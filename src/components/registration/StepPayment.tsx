@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { RegistrationFormData } from '@/types/registration';
-import { Upload, X, Copy, Check, QrCode, CreditCard, Wallet } from 'lucide-react';
+import { Upload, X, Copy, Check, QrCode, CreditCard, Wallet, Loader2 } from 'lucide-react';
+import imageCompression from 'browser-image-compression';
 
 interface StepPaymentProps {
     formData: RegistrationFormData;
@@ -14,6 +15,7 @@ const StepPayment: React.FC<StepPaymentProps> = ({ formData, updateFormData }) =
     const [previewUrl, setPreviewUrl] = useState<string | null>(formData.paymentProof ? URL.createObjectURL(formData.paymentProof) : null);
     const [isCopied, setIsCopied] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
+    const [isCompressing, setIsCompressing] = useState(false);
 
     // Calculate Price
     const basePrice = formData.raceCategory === 'VIP' ? 2000 : 500;
@@ -33,10 +35,32 @@ const StepPayment: React.FC<StepPaymentProps> = ({ formData, updateFormData }) =
         }
     };
 
-    const processFile = (file: File) => {
-        updateFormData({ paymentProof: file });
-        setPreviewUrl(URL.createObjectURL(file));
-        setIsDragOver(false);
+    const processFile = async (file: File) => {
+        setIsCompressing(true);
+
+        // Settings for compression
+        const options = {
+            maxSizeMB: 0.1,          // Max 0.5 MB
+            maxWidthOrHeight: 800,  // Max dimension
+            useWebWorker: true,
+            fileType: "image/jpeg"
+        };
+
+        try {
+            const compressedFile = await imageCompression(file, options);
+
+            updateFormData({ paymentProof: compressedFile });
+            setPreviewUrl(URL.createObjectURL(compressedFile));
+            console.log(`Original: ${file.size / 1024 / 1024} MB, Compressed: ${compressedFile.size / 1024 / 1024} MB`);
+        } catch (error) {
+            console.error("Compression failed:", error);
+            // Fallback to original
+            updateFormData({ paymentProof: file });
+            setPreviewUrl(URL.createObjectURL(file));
+        } finally {
+            setIsDragOver(false);
+            setIsCompressing(false);
+        }
     };
 
     const handleDrop = (e: React.DragEvent) => {
@@ -193,6 +217,14 @@ const StepPayment: React.FC<StepPaymentProps> = ({ formData, updateFormData }) =
                             onChange={handleFileChange}
                             className={`absolute inset-0 w-full h-full cursor-pointer z-10 ${previewUrl ? 'hidden' : 'opacity-0'}`}
                         />
+
+                        {/* Loading Indicator */}
+                        {isCompressing && (
+                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
+                                <Loader2 className="w-10 h-10 text-neon-green animate-spin" />
+                                <p className="text-sm font-bold text-deep-blue mt-2">Compressing...</p>
+                            </div>
+                        )}
 
                         {previewUrl ? (
                             <div className="relative w-full h-full flex items-center justify-center p-4">
