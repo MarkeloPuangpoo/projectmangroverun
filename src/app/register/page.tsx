@@ -135,7 +135,19 @@ function RegisterContent() {
                     }
                 ]);
 
+
             if (insertError) throw new Error(`Registration Failed: ${insertError.message}`);
+
+            // ✅ TRIGGER EMAIL: Submission Received
+            fetch('/api/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    to: formData.email,
+                    type: 'submission',
+                    data: { name: formData.fullNameTh }
+                })
+            }).catch(err => console.error('Failed to send email:', err));
 
             setIsSuccessOpen(true);
 

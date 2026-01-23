@@ -112,7 +112,7 @@ export default function PaymentAuditPage() {
         };
     }, [registrations]);
 
-    const handleUpdateStatus = async (status: 'approved' | 'rejected') => {
+    const handleUpdateStatus = async (status: 'approved' | 'rejected' | 'pending') => {
         if (!selectedId) return;
 
         // ✅ ถ้ากด Approve ต้องเช็คว่าใส่ BIB หรือยัง
@@ -141,9 +141,49 @@ export default function PaymentAuditPage() {
             })
             .eq('id', selectedId);
 
+
         if (error) {
             alert('Error updating status');
             fetchRegistrations();
+        } else {
+            // ✅ Email Trigger Setup
+            const runner = registrations.find(r => r.id === selectedId);
+            if (!runner) return;
+
+            if (status === 'approved') {
+                // ✅ APPROVAL EMAIL
+                fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to: runner.email,
+                        type: 'approval',
+                        data: {
+                            name: runner.full_name_th,
+                            bib: bibInput,
+                            raceCategory: runner.race_category
+                        }
+                    })
+                }).catch(err => console.error('Failed to send email:', err));
+
+            } else if (status === 'rejected') {
+                // ✅ REJECTION EMAIL (Optional Reason)
+                const reason = prompt('ระบุเหตุผลที่ไม่อนุมัติ (Optional):', 'หลักฐานไม่ถูกต้อง / ยอดเงินไม่ตรง');
+                if (reason !== null) { // ถ้ากด Cancel ไม่ต้องส่งเมล (แต่สถานะเปลี่ยนไปแล้ว... อาจจะต้องปรับ Logic นิดหน่อย แต่เอาง่ายก่อน)
+                    fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            to: runner.email,
+                            type: 'rejection',
+                            data: {
+                                name: runner.full_name_th,
+                                reason: reason
+                            }
+                        })
+                    }).catch(err => console.error('Failed to send email:', err));
+                }
+            }
         }
     };
 
@@ -393,7 +433,6 @@ export default function PaymentAuditPage() {
     );
 }
 
-// ... (Helper Components: ToolBtn, DetailRow, DetailField, StatusBadge เหมือนเดิม)
 function ToolBtn({ icon, onClick, tooltip }: any) {
     return (
         <button onClick={onClick} title={tooltip} className="p-2.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all active:scale-95">

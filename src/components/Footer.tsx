@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Facebook, Instagram, Mail, Phone, MapPin, Leaf, ArrowUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/data/translations';
@@ -9,6 +9,13 @@ import Link from 'next/link';
 const Footer = () => {
     const { language } = useLanguage();
     const t = translations[language].footer;
+
+    useEffect(() => {
+        console.log(
+            '%c Developed by Pondet Puangpoo ',
+            'background: #222; color: #bada55; font-size: 12px; padding: 4px; border-radius: 4px;'
+        );
+    }, []);
 
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -115,6 +122,15 @@ const Footer = () => {
                     <p className="text-gray-500 text-sm text-center md:text-left">
                         © 2026 Mangrove BPK RUN. All rights reserved.
                     </p>
+
+                    {/* Stealth Credit */}
+                    <div className="hidden md:block">
+                        <span className="group relative inline-block cursor-default">
+                            <span className="text-[10px] text-white/5 transition-all duration-500 group-hover:text-white/30">
+                                Crafted by <span className="font-semibold">Pondet Puangpoo</span>
+                            </span>
+                        </span>
+                    </div>
                     <button
                         onClick={scrollToTop}
                         className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 hover:bg-neon-green hover:text-deep-blue text-sm font-bold text-gray-400 transition-all group"
