@@ -8,7 +8,8 @@ import {
     Shirt,
     Settings,
     Leaf,
-    LifeBuoy
+    LifeBuoy,
+    Mail
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -74,6 +75,12 @@ export default function AdminSidebar({ pendingCount = 0 }: { pendingCount?: numb
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider pl-3 mb-2">Management</p>
                 </div>
 
+                <NavItem
+                    href="/admin/resend"
+                    icon={<Mail size={20} />}
+                    label="Resend Emails"
+                    active={isActive('/admin/resend')}
+                />
                 <NavItem
                     href="/admin/stock"
                     icon={<Shirt size={20} />}

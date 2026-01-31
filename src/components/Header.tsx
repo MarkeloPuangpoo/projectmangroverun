@@ -7,173 +7,189 @@ import { translations } from '@/data/translations';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+const NAV_ITEMS = [
+    { id: 'home', href: '/#home', labelKey: 'home' },
+    { id: 'race-info', href: '/#race-info', labelKey: 'categories' },
+    { id: 'routes', href: '/#routes', labelKey: 'routes' },
+    { id: 'awards', href: '/#awards', labelKey: 'awards' },
+];
+
 const Header = () => {
     const { language, toggleLanguage } = useLanguage();
     const pathname = usePathname();
     const t = translations[language].nav;
+
+    // State
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [activeSection, setActiveSection] = useState('home');
 
-    // Handle scroll effect
+    // 1. Scroll Effect & Active Section Spy
     useEffect(() => {
         const handleScroll = () => {
+            // Header Background Logic
             setScrolled(window.scrollY > 20);
+
+            // Active Section Logic (Scroll Spy)
+            if (pathname === '/') {
+                const sections = NAV_ITEMS.map(item => item.id);
+                const current = sections.find(section => {
+                    const element = document.getElementById(section);
+                    if (element) {
+                        const rect = element.getBoundingClientRect();
+                        return rect.top <= 150 && rect.bottom >= 150;
+                    }
+                    return false;
+                });
+                if (current) setActiveSection(current);
+            }
         };
+
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+    }, [pathname]);
 
-    const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
-        if (!isMenuOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-    };
-
-    // ✅ FIXED: Logic สี Header
-    // ถ้าอยู่หน้า Home ('/') และยังไม่ scroll -> โปร่งใส (ตัวหนังสือขาว)
-    // ถ้าอยู่หน้าอื่น (เช่น /register) -> ทึบเสมอ (ตัวหนังสือดำ)
+    // 2. Logic สี Header: เรียบง่ายขึ้น (Predictable)
+    // หน้า Home + ยังไม่ scroll + เมนูไม่เปิด = Transparent
+    // นอกนั้น = Solid White ทั้งหมด
     const isHomePage = pathname === '/';
     const isTransparent = isHomePage && !scrolled && !isMenuOpen;
 
-    const NavLink = ({ href, children, mobile = false }: { href: string; children: React.ReactNode; mobile?: boolean }) => (
-        <a
-            href={href}
-            onClick={() => mobile && toggleMenu()}
-            className={`
-                relative font-bold transition-all duration-300 group
-                ${mobile
-                    ? 'text-3xl text-deep-blue hover:text-neon-green'
-                    : `text-sm uppercase tracking-wider ${isTransparent
-                        ? 'text-white/90 hover:text-neon-green drop-shadow-md'
-                        : 'text-gray-600 hover:text-deep-blue'}` // ✅ หน้า Register จะเข้าเงื่อนไขนี้ (สีเทาเข้ม)
-                }
-            `}
-        >
-            {children}
-            {!mobile && (
-                <span className={`absolute -bottom-1 left-0 h-0.5 transition-all duration-300 group-hover:w-full w-0 ${isTransparent ? 'bg-neon-green' : 'bg-deep-blue'}`} />
-            )}
-        </a>
-    );
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+        document.body.style.overflow = !isMenuOpen ? 'hidden' : 'unset';
+    };
 
     return (
         <>
             <header
                 className={`
-                    fixed top-0 left-0 right-0 z-50 transition-all duration-300
-                    ${!isTransparent
-                        ? 'bg-white/90 backdrop-blur-md shadow-sm border-b leading-relaxed border-gray-100 py-0'
-                        : 'bg-transparent py-4'}
+                    fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b
+                    ${isTransparent
+                        ? 'bg-transparent border-transparent py-6'
+                        : 'bg-white border-slate-100 py-3 shadow-sm'}
                 `}
             >
-                <div className="max-w-7xl mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
 
-                    {/* Logo Area */}
-                    <Link href="/" className="flex items-center gap-2 group z-50 relative">
+                    {/* --- Brand Identity --- */}
+                    <Link href="/" className="flex items-center gap-3 group z-50">
                         <div className={`
-                            w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-105
-                            ${isTransparent ? 'bg-white/20 backdrop-blur-md border border-white/30' : 'bg-deep-blue shadow-blue-900/20'}
+                            w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300
+                            ${isTransparent
+                                ? 'bg-white/20 backdrop-blur-md text-white border border-white/20'
+                                : 'bg-deep-blue text-neon-green shadow-lg shadow-blue-900/10'}
                         `}>
-                            <Leaf className={`w-5 h-5 md:w-6 md:h-6 ${isTransparent ? 'text-white' : 'text-neon-green'}`} />
+                            <Leaf className="w-6 h-6 fill-current" />
                         </div>
                         <div className="flex flex-col">
-                            <span className={`text-lg md:text-xl font-black leading-none tracking-tight transition-colors duration-300 ${isTransparent ? 'text-white' : 'text-deep-blue'} group-hover:text-neon-green`}>
-                                Mangrove
+                            <span className={`text-xl font-black leading-none tracking-tight transition-colors ${isTransparent ? 'text-white' : 'text-slate-900'}`}>
+                                MANGROVE
                             </span>
-                            <span className={`text-[10px] md:text-xs font-bold tracking-widest uppercase transition-colors duration-300 ${isTransparent ? 'text-white/80' : 'text-gray-500'}`}>
-                                BPK RUN 2026
+                            <span className={`text-[10px] font-bold tracking-[0.2em] uppercase transition-colors ${isTransparent ? 'text-white/80' : 'text-slate-500'}`}>
+                                RUN 2026
                             </span>
                         </div>
                     </Link>
 
-                    {/* Desktop Navigation */}
-                    <nav className="hidden md:flex items-center gap-8">
-                        <NavLink href="/#home">{t.home}</NavLink>
-                        <NavLink href="/#race-info">{t.categories}</NavLink>
-                        <NavLink href="/#routes">{t.routes}</NavLink>
-                        <NavLink href="/#awards">{t.awards}</NavLink>
+                    {/* --- Desktop Nav (Clean & Active State Aware) --- */}
+                    <nav className="hidden md:flex items-center gap-1">
+                        {NAV_ITEMS.map((item) => {
+                            const isActive = activeSection === item.id && isHomePage;
+
+                            return (
+                                <Link
+                                    key={item.id}
+                                    href={item.href}
+                                    className={`
+                                        relative px-4 py-2 text-sm font-bold uppercase tracking-wide transition-all rounded-full
+                                        ${isTransparent
+                                            ? 'text-white hover:bg-white/10'
+                                            : isActive
+                                                ? 'text-deep-blue bg-slate-100' // Active State ชัดเจน
+                                                : 'text-slate-500 hover:text-deep-blue hover:bg-slate-50'}
+                                    `}
+                                >
+                                    {/* @ts-ignore */}
+                                    {t[item.labelKey]}
+                                </Link>
+                            );
+                        })}
                     </nav>
 
-                    {/* Desktop Actions */}
+                    {/* --- Desktop Actions --- */}
                     <div className="hidden md:flex items-center gap-4">
+                        {/* Language Toggle */}
                         <button
                             onClick={toggleLanguage}
                             className={`
-                                flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-all
+                                flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold transition-all border
                                 ${isTransparent
-                                    ? 'border-white/30 text-white hover:bg-white/10'
-                                    : 'border-gray-200 text-deep-blue hover:bg-gray-50 hover:border-gray-300'}
+                                    ? 'border-white/20 text-white hover:bg-white/10'
+                                    : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'}
                             `}
                         >
-                            <Globe className="w-3.5 h-3.5" />
+                            <Globe size={14} />
                             <span>{language === 'th' ? 'EN' : 'TH'}</span>
                         </button>
 
+                        {/* CTA: Consistent Styling (Brand Anchor) */}
                         <Link href="/register">
-                            {/* ✅ ปรับปุ่มให้มองเห็นชัดเจนในทุกสถานะ */}
-                            <button className={`
-                                px-6 py-2.5 font-black rounded-xl transition-all shadow-lg transform hover:-translate-y-0.5
-                                ${isTransparent
-                                    ? 'bg-neon-green text-deep-blue hover:bg-white shadow-green-500/20'
-                                    : 'bg-neon-green text-deep-blue hover:bg-deep-blue hover:text-white shadow-green-500/20'}
-                            `}>
+                            <button className="bg-neon-green text-deep-blue px-6 py-2.5 rounded-xl font-black text-sm uppercase tracking-wide shadow-lg shadow-green-400/20 hover:brightness-105 hover:-translate-y-0.5 transition-all active:scale-95">
                                 {t.register}
                             </button>
                         </Link>
                     </div>
 
-                    {/* Mobile Menu Button */}
+                    {/* --- Mobile Toggle --- */}
                     <button
-                        className={`md:hidden p-2 z-50 relative rounded-lg transition-colors ${isTransparent ? 'text-white hover:bg-white/10' : 'text-deep-blue hover:bg-gray-100'}`}
                         onClick={toggleMenu}
-                        aria-label="Toggle menu"
+                        className={`md:hidden p-2 rounded-lg transition-colors z-50 ${isTransparent ? 'text-white' : 'text-slate-800'}`}
                     >
-                        {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                        {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
                     </button>
                 </div>
             </header>
 
-            {/* Mobile Menu Overlay (ส่วนนี้เหมือนเดิม เพราะพื้นหลังขาว ตัวหนังสือสีเข้มอยู่แล้ว) */}
+            {/* --- Mobile Menu (Lighter & Faster) --- */}
             <div
                 className={`
-                    fixed inset-0 z-40 bg-white md:hidden transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)
-                    ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'}
+                    fixed inset-0 z-40 bg-white md:hidden transition-all duration-300 ease-out
+                    ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'}
                 `}
             >
-                {/* Background Decoration */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-neon-green/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-deep-blue/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                <div className="flex flex-col h-full pt-24 px-6 pb-8">
+                    {/* Mobile Nav Links */}
+                    <div className="flex flex-col gap-2">
+                        {NAV_ITEMS.map((item) => (
+                            <Link
+                                key={item.id}
+                                href={item.href}
+                                onClick={toggleMenu}
+                                className={`
+                                    text-2xl font-black uppercase py-4 border-b border-slate-100 flex items-center justify-between group
+                                    ${activeSection === item.id && isHomePage ? 'text-deep-blue' : 'text-slate-400'}
+                                `}
+                            >
+                                {/* @ts-ignore */}
+                                {t[item.labelKey]}
+                                <span className={`w-2 h-2 rounded-full ${activeSection === item.id && isHomePage ? 'bg-neon-green' : 'bg-transparent group-hover:bg-slate-200'}`} />
+                            </Link>
+                        ))}
+                    </div>
 
-                <div className="flex flex-col h-full pt-28 pb-10 px-6 relative z-10">
-                    <nav className="flex flex-col gap-6 items-start">
-                        <NavLink href="/#home" mobile>{t.home}</NavLink>
-                        <NavLink href="/#race-info" mobile>{t.categories}</NavLink>
-                        <NavLink href="/#routes" mobile>{t.routes}</NavLink>
-                        <NavLink href="/#awards" mobile>{t.awards}</NavLink>
-                        <NavLink href="/#highlights" mobile>{t.raceKit}</NavLink>
-                    </nav>
-
+                    {/* Mobile Footer Actions */}
                     <div className="mt-auto space-y-4">
-                        <div className="h-px w-full bg-gray-100 mb-6" />
-
                         <button
                             onClick={() => { toggleLanguage(); toggleMenu(); }}
-                            className="w-full flex items-center justify-between px-4 py-4 rounded-2xl bg-gray-50 font-bold text-deep-blue active:scale-95 transition-transform"
+                            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-slate-200 font-bold text-slate-600"
                         >
-                            <span className="flex items-center gap-2">
-                                <Globe className="w-5 h-5" />
-                                {language === 'th' ? 'เปลี่ยนภาษา' : 'Language'}
-                            </span>
-                            <span className="text-neon-green bg-deep-blue px-2 py-1 rounded text-xs">
-                                {language === 'th' ? 'TH' : 'EN'}
-                            </span>
+                            <Globe size={18} />
+                            {language === 'th' ? 'Switch to English' : 'เปลี่ยนเป็นภาษาไทย'}
                         </button>
 
                         <Link href="/register" onClick={toggleMenu} className="block">
-                            <button className="w-full py-4 bg-deep-blue text-white font-black rounded-2xl shadow-xl shadow-blue-900/20 active:scale-95 transition-transform flex items-center justify-center gap-2">
+                            <button className="w-full py-4 bg-deep-blue text-neon-green font-black rounded-xl text-lg uppercase tracking-wider shadow-xl shadow-blue-900/10">
                                 {t.register}
                             </button>
                         </Link>

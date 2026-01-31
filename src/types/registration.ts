@@ -21,6 +21,7 @@ export interface RegistrationFormData {
     kit_picked_up?: boolean;
     checked_in_at?: string;
     bib_number?: string;
+    address?: string | null;
 }
 
 export interface Registration extends RegistrationFormData {
@@ -37,6 +38,7 @@ export interface Registration extends RegistrationFormData {
     shirt_size: string;
     shipping_method: string;
     medical_conditions: string | null;
+    address: string | null;
 }
 
 export type RegistrationStep = 1 | 2 | 3;

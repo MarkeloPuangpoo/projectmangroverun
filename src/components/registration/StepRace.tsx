@@ -1,6 +1,6 @@
 import React from 'react';
 import { RegistrationFormData } from '@/types/registration';
-import { Trophy, Zap, Heart, Crown, Ruler, CheckCircle2, Truck, Store, Shirt } from 'lucide-react';
+import { Trophy, Zap, Heart, Crown, Ruler, CheckCircle2, Truck, Store, Shirt, MapPin } from 'lucide-react';
 
 interface StepRaceProps {
     formData: RegistrationFormData;
@@ -18,11 +18,10 @@ const StepRace: React.FC<StepRaceProps> = ({ formData, updateFormData, onOpenSiz
             title: "Mini Marathon",
             price: 500,
             icon: Trophy,
-            // Theme: Energetic Orange
             bgActive: "bg-orange-50",
             borderActive: "border-orange-500",
             textActive: "text-orange-600",
-            badgeColor: "bg-orange-100 text-orange-700"
+            ringActive: "ring-orange-200"
         },
         {
             id: "6KM",
@@ -30,11 +29,10 @@ const StepRace: React.FC<StepRaceProps> = ({ formData, updateFormData, onOpenSiz
             title: "Fun Run",
             price: 500,
             icon: Zap,
-            // Theme: Nature Green
-            bgActive: "bg-green-50",
+            bgActive: "bg-emerald-50",
             borderActive: "border-emerald-500",
             textActive: "text-emerald-600",
-            badgeColor: "bg-emerald-100 text-emerald-700"
+            ringActive: "ring-emerald-200"
         },
         {
             id: "5KM",
@@ -42,11 +40,10 @@ const StepRace: React.FC<StepRaceProps> = ({ formData, updateFormData, onOpenSiz
             title: "Walk-Run",
             price: 500,
             icon: Heart,
-            // Theme: Healthy Pink
             bgActive: "bg-pink-50",
             borderActive: "border-pink-500",
             textActive: "text-pink-600",
-            badgeColor: "bg-pink-100 text-pink-700"
+            ringActive: "ring-pink-200"
         },
         {
             id: "VIP",
@@ -54,11 +51,10 @@ const StepRace: React.FC<StepRaceProps> = ({ formData, updateFormData, onOpenSiz
             title: "All Distances",
             price: 2000,
             icon: Crown,
-            // Theme: Exclusive Gold
             bgActive: "bg-yellow-50",
             borderActive: "border-yellow-500",
             textActive: "text-yellow-600",
-            badgeColor: "bg-yellow-100 text-yellow-800"
+            ringActive: "ring-yellow-200"
         }
     ];
 
@@ -69,26 +65,26 @@ const StepRace: React.FC<StepRaceProps> = ({ formData, updateFormData, onOpenSiz
 
             {/* Header */}
             <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                    <Zap className="w-6 h-6 text-deep-blue" />
+                <div className="p-2 bg-indigo-50 rounded-lg">
+                    <Zap className="w-6 h-6 text-indigo-600" />
                 </div>
                 <div>
-                    <h2 className="text-xl md:text-2xl font-bold text-deep-blue">รายละเอียดการแข่งขัน</h2>
-                    <p className="text-xs text-gray-500">Race Information & Kits</p>
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-800">ข้อมูลการแข่งขัน</h2>
+                    <p className="text-xs text-slate-500">Race Information & Kits</p>
                 </div>
             </div>
 
-            {/* 1. Category Selection */}
-            <div className="space-y-4">
-                <label className="block text-sm font-bold text-gray-700">
-                    เลือกประเภทการแข่งขัน <span className="text-neon-green text-xs font-normal bg-deep-blue px-2 py-0.5 rounded-full ml-2">Select Category</span>
+            {/* --- 1. Category Selection --- */}
+            <section className="space-y-4">
+                <label className="block text-sm font-bold text-slate-700">
+                    เลือกประเภทการแข่งขัน <span className="text-red-500">*</span>
                 </label>
 
                 <div className="grid md:grid-cols-2 gap-4">
                     {categories.map((cat) => {
                         const isSelected = formData.raceCategory === cat.id;
                         return (
-                            <label key={cat.id} className="cursor-pointer relative group">
+                            <label key={cat.id} className="cursor-pointer relative group block">
                                 <input
                                     type="radio"
                                     name="raceCategory"
@@ -98,83 +94,71 @@ const StepRace: React.FC<StepRaceProps> = ({ formData, updateFormData, onOpenSiz
                                     className="peer sr-only"
                                 />
                                 <div className={`
-                                    p-5 rounded-2xl border-2 transition-all duration-300 relative overflow-hidden
-                                    hover:shadow-lg hover:-translate-y-1
+                                    p-5 rounded-2xl border-2 transition-all duration-300 relative overflow-hidden flex items-center gap-4
+                                    hover:shadow-md
                                     ${isSelected
-                                        ? `${cat.borderActive} ${cat.bgActive} shadow-md`
-                                        : 'border-gray-100 bg-white hover:border-gray-300'
+                                        ? `${cat.borderActive} ${cat.bgActive} shadow-sm ring-4 ${cat.ringActive} ring-opacity-50`
+                                        : 'border-slate-100 bg-white hover:border-slate-300'
                                     }
                                 `}>
-                                    {/* Selection Indicator */}
+                                    {/* Icon Box */}
                                     <div className={`
-                                        absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300
-                                        ${isSelected ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}
-                                        bg-deep-blue text-white
+                                        w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black shadow-sm transition-colors shrink-0
+                                        ${isSelected ? 'bg-white' : 'bg-slate-100 text-slate-400'}
+                                        ${isSelected ? cat.textActive : ''}
                                     `}>
-                                        <CheckCircle2 className="w-4 h-4" />
+                                        <cat.icon className="w-8 h-8" />
                                     </div>
 
-                                    <div className="flex items-start gap-4 relative z-10">
-                                        {/* Large Distance Number */}
-                                        <div className={`
-                                            w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black shadow-sm transition-colors
-                                            ${isSelected ? 'bg-white' : 'bg-gray-100 text-gray-400'}
-                                            ${isSelected ? cat.textActive : ''}
-                                        `}>
-                                            <cat.icon className="w-8 h-8" />
+                                    {/* Text Content */}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-center">
+                                            <h3 className={`text-2xl font-black tracking-tight ${isSelected ? 'text-slate-800' : 'text-slate-600'}`}>
+                                                {cat.distance}
+                                            </h3>
+                                            {isSelected && <CheckCircle2 className={`w-6 h-6 ${cat.textActive}`} />}
                                         </div>
-
-                                        <div className="flex-1 pt-1">
-                                            <div className="flex justify-between items-start pr-8">
-                                                <div>
-                                                    <h3 className={`text-2xl font-black tracking-tight ${isSelected ? 'text-deep-blue' : 'text-gray-700'}`}>
-                                                        {cat.distance}
-                                                    </h3>
-                                                    <p className="text-sm font-medium text-gray-500">{cat.title}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="mt-3 inline-flex items-center px-3 py-1 rounded-lg font-bold text-sm bg-white border border-gray-100 shadow-sm">
-                                                {cat.price.toLocaleString()} THB
-                                            </div>
+                                        <p className="text-sm font-medium text-slate-500 mb-2">{cat.title}</p>
+                                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-lg font-bold text-xs bg-white border border-slate-200 shadow-sm text-slate-700">
+                                            ฿ {cat.price.toLocaleString()}
                                         </div>
                                     </div>
 
-                                    {/* Decorative Background Icon */}
+                                    {/* Decorative BG Icon */}
                                     <cat.icon className={`
-                                        absolute -bottom-4 -right-4 w-32 h-32 opacity-5 pointer-events-none transition-transform
-                                        ${isSelected ? 'scale-110' : 'scale-100'}
+                                        absolute -bottom-4 -right-4 w-32 h-32 opacity-5 pointer-events-none transition-transform duration-500
+                                        ${isSelected ? 'scale-110 rotate-12' : 'scale-100'}
                                     `} />
                                 </div>
                             </label>
                         );
                     })}
                 </div>
-            </div>
+            </section>
 
             <div className="border-t border-dashed border-gray-200"></div>
 
-            {/* 2. Shirt Size Selection */}
-            <div className="space-y-4">
+            {/* --- 2. Shirt Size Selection --- */}
+            <section className="space-y-4">
                 <div className="flex items-end justify-between">
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 flex items-center gap-2">
-                            ไซส์เสื้อ <Shirt className="w-4 h-4 text-gray-400" />
+                        <label className="block text-sm font-bold text-slate-700 flex items-center gap-2">
+                            ไซส์เสื้อ / Shirt Size <span className="text-red-500">*</span>
                         </label>
-                        <p className="text-xs text-gray-400 mt-1">Select your shirt size</p>
+                        <p className="text-xs text-slate-400 mt-1">กรุณาตรวจสอบตารางไซส์ให้ถูกต้อง</p>
                     </div>
                     <button
                         type="button"
                         onClick={onOpenSizeChart}
-                        className="text-sm text-deep-blue font-bold flex items-center gap-1.5 hover:text-neon-green transition-colors bg-gray-100 hover:bg-deep-blue px-3 py-1.5 rounded-lg"
+                        className="text-xs font-bold flex items-center gap-1.5 text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-lg transition-colors"
                     >
-                        <Ruler className="w-4 h-4" /> ตารางไซส์ (Chart)
+                        <Ruler className="w-4 h-4" /> ดูตารางไซส์
                     </button>
                 </div>
 
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-6 lg:grid-cols-12 gap-2">
                     {shirtSizes.map((size) => (
-                        <label key={size} className="cursor-pointer group">
+                        <label key={size} className="cursor-pointer group relative">
                             <input
                                 type="radio"
                                 name="shirtSize"
@@ -184,29 +168,27 @@ const StepRace: React.FC<StepRaceProps> = ({ formData, updateFormData, onOpenSiz
                                 className="peer sr-only"
                             />
                             <div className="
-                                py-3.5 text-center rounded-xl border-2 border-gray-100 font-bold text-gray-600 relative overflow-hidden transition-all duration-200
-                                hover:border-gray-300 hover:bg-gray-50
-                                peer-checked:bg-deep-blue peer-checked:text-neon-green peer-checked:border-deep-blue peer-checked:shadow-lg peer-checked:shadow-blue-900/30 peer-checked:scale-105
+                                py-3 text-center rounded-xl border-2 border-slate-100 font-bold text-slate-500 text-sm transition-all duration-200
+                                hover:border-slate-300 hover:bg-slate-50
+                                peer-checked:bg-slate-800 peer-checked:text-neon-green peer-checked:border-slate-800 peer-checked:shadow-lg peer-checked:scale-105 peer-focus:ring-2 peer-focus:ring-offset-1 peer-focus:ring-slate-300
                             ">
                                 {size}
-                                {/* Selection Dot */}
-                                <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-neon-green opacity-0 peer-checked:opacity-100 transition-opacity" />
                             </div>
                         </label>
                     ))}
                 </div>
-            </div>
+            </section>
 
             <div className="border-t border-dashed border-gray-200"></div>
 
-            {/* 3. Shipping Method */}
-            <div className="space-y-4">
-                <label className="block text-sm font-bold text-gray-700">
-                    การรับเสื้อและเบอร์วิ่ง <span className="text-gray-400 font-normal ml-2">Shipping Method</span>
+            {/* --- 3. Shipping Method & Address --- */}
+            <section className="space-y-6">
+                <label className="block text-sm font-bold text-slate-700">
+                    การรับอุปกรณ์ (Race Kit) <span className="text-red-500">*</span>
                 </label>
 
                 <div className="grid md:grid-cols-2 gap-4">
-                    {/* Pickup Option */}
+                    {/* Pickup */}
                     <label className="cursor-pointer group">
                         <input
                             type="radio"
@@ -217,24 +199,24 @@ const StepRace: React.FC<StepRaceProps> = ({ formData, updateFormData, onOpenSiz
                             className="peer sr-only"
                         />
                         <div className="
-                            p-4 rounded-xl border-2 border-gray-100 flex items-center gap-4 transition-all
-                            hover:border-gray-300 hover:bg-gray-50
-                            peer-checked:border-neon-green peer-checked:bg-green-50/30 peer-checked:shadow-sm
+                            p-4 rounded-xl border-2 border-slate-100 flex items-center gap-4 transition-all h-full
+                            hover:border-slate-300 hover:bg-slate-50
+                            peer-checked:border-emerald-500 peer-checked:bg-emerald-50/20 peer-checked:shadow-sm
                         ">
-                            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 peer-checked:bg-neon-green peer-checked:text-deep-blue transition-colors">
+                            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 peer-checked:bg-emerald-100 peer-checked:text-emerald-600 transition-colors">
                                 <Store className="w-6 h-6" />
                             </div>
                             <div className="flex-1">
-                                <div className="font-bold text-deep-blue">รับด้วยตนเอง (Pick up)</div>
-                                <div className="text-xs text-gray-500">May 25, 2026 at Event Location</div>
+                                <div className="font-bold text-slate-800">รับด้วยตนเอง (Pickup)</div>
+                                <div className="text-xs text-slate-500">24-25 พ.ค. ณ จุดปล่อยตัว</div>
                             </div>
-                            <div className="px-3 py-1 rounded-lg bg-gray-100 text-xs font-bold text-gray-600 peer-checked:bg-neon-green peer-checked:text-deep-blue">
+                            <div className="px-3 py-1 rounded-lg bg-emerald-100 text-xs font-bold text-emerald-700">
                                 Free
                             </div>
                         </div>
                     </label>
 
-                    {/* Postal Option */}
+                    {/* Postal */}
                     <label className="cursor-pointer group">
                         <input
                             type="radio"
@@ -245,24 +227,47 @@ const StepRace: React.FC<StepRaceProps> = ({ formData, updateFormData, onOpenSiz
                             className="peer sr-only"
                         />
                         <div className="
-                            p-4 rounded-xl border-2 border-gray-100 flex items-center gap-4 transition-all
-                            hover:border-gray-300 hover:bg-gray-50
-                            peer-checked:border-neon-green peer-checked:bg-green-50/30 peer-checked:shadow-sm
+                            p-4 rounded-xl border-2 border-slate-100 flex items-center gap-4 transition-all h-full
+                            hover:border-slate-300 hover:bg-slate-50
+                            peer-checked:border-indigo-500 peer-checked:bg-indigo-50/20 peer-checked:shadow-sm
                         ">
-                            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 peer-checked:bg-neon-green peer-checked:text-deep-blue transition-colors">
+                            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 peer-checked:bg-indigo-100 peer-checked:text-indigo-600 transition-colors">
                                 <Truck className="w-6 h-6" />
                             </div>
                             <div className="flex-1">
-                                <div className="font-bold text-deep-blue">จัดส่งไปรษณีย์ (Postal)</div>
-                                <div className="text-xs text-gray-500">Delivery within 3-5 days</div>
+                                <div className="font-bold text-slate-800">จัดส่งไปรษณีย์ (Postal)</div>
+                                <div className="text-xs text-slate-500">รอรับที่บ้านภายใน 3-5 วัน</div>
                             </div>
-                            <div className="px-3 py-1 rounded-lg bg-gray-100 text-xs font-bold text-gray-600 peer-checked:bg-neon-green peer-checked:text-deep-blue">
-                                +50 THB
+                            <div className="px-3 py-1 rounded-lg bg-slate-100 text-xs font-bold text-slate-600 peer-checked:bg-indigo-600 peer-checked:text-white">
+                                +50 ฿
                             </div>
                         </div>
                     </label>
                 </div>
-            </div>
+
+                {/* 🔥 Conditional Address Field (สำคัญมาก!) */}
+                {formData.shipping === 'postal' && (
+                    <div className="animate-fade-in-down pt-2">
+                        <label className="block text-sm font-bold text-indigo-600 mb-2 flex items-center gap-2">
+                            <MapPin className="w-4 h-4" /> ที่อยู่สำหรับจัดส่ง (Shipping Address) <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                            <textarea
+                                required
+                                rows={3}
+                                className="w-full p-4 rounded-xl border border-indigo-200 bg-indigo-50/30 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 text-slate-800 placeholder:text-slate-400 resize-none transition-all"
+                                placeholder="บ้านเลขที่, หมู่, ซอย, ถนน, แขวง/ตำบล, เขต/อำเภอ, จังหวัด, รหัสไปรษณีย์..."
+                                value={formData.address || ''}
+                                // หมายเหตุ: ตรวจสอบให้แน่ใจว่า type RegistrationFormData มี field 'address' ด้วยนะครับ
+                                onChange={(e) => updateFormData({ address: e.target.value })}
+                            />
+                        </div>
+                        <p className="text-xs text-slate-400 mt-2 text-right">
+                            *กรุณาตรวจสอบความถูกต้องเพื่อป้องกันพัสดุตีกลับ
+                        </p>
+                    </div>
+                )}
+            </section>
         </div>
     );
 };

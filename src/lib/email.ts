@@ -1,226 +1,255 @@
 import nodemailer from 'nodemailer';
 
+// --- 1. Config Validation & Setup ---
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = Number(process.env.SMTP_PORT) || 587;
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
 const SMTP_FROM = process.env.SMTP_FROM || '"Mangrove Run Team" <noreply@mangroverun.com>';
 
-// Config สีและธีม
-const THEME = {
-    primary: '#0F172A', // Deep Blue
-    accent: '#CCFF00',  // Neon Green
-    text: '#334155',    // Slate 700
-    bg: '#F8FAFC',      // Slate 50
-    white: '#FFFFFF'
-};
+// Validate Critical Config on Load (Fail-Fast)
+if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    console.warn('⚠️ EMAIL SYSTEM WARNING: SMTP Environment variables are missing. Emails will not be sent.');
+}
 
 const transporter = nodemailer.createTransport({
     host: SMTP_HOST,
     port: SMTP_PORT,
-    secure: SMTP_PORT === 465,
+    secure: false,
     auth: {
         user: SMTP_USER,
         pass: SMTP_PASS,
     },
 });
 
+// --- 2. Design System (Fixed Light Theme for Email Reliability) ---
+// Email clients (Gmail/Outlook) often mess up dark mode. 
+// Safest bet: Force Light Theme container with high contrast.
+const THEME = {
+    primary: '#0F172A', // Navy Blue
+    secondary: '#334155', // Slate 700
+    accent: '#16a34a',  // Green 600 (Accessible on white)
+    bg: '#f1f5f9',      // Slate 100
+    card: '#ffffff',
+    text: '#1e293b',    // Slate 800
+    muted: '#64748b',   // Slate 500
+    border: '#e2e8f0'   // Slate 200
+};
 
-export type EmailType = 'submission' | 'approval' | 'rejection';
+// --- 3. Strict Type Definitions ---
 
-interface SubmissionData {
-    name: string;
-}
+export type EmailPayloads = {
+    submission: {
+        name: string;
+    };
+    approval: {
+        name: string;
+        bib: string;
+        raceCategory: string;
+    };
+    rejection: {
+        name: string;
+        reason?: string;
+    };
+};
 
-interface ApprovalData {
-    name: string;
-    bib: string;
-    raceCategory: string;
-}
+export type EmailType = keyof EmailPayloads;
 
-interface RejectionData {
-    name: string;
-    reason?: string;
-}
-
-type EmailData = SubmissionData | ApprovalData | RejectionData;
-
-interface EmailTemplate {
+interface EmailTemplate<T> {
     subject: string;
-    html: (data: unknown) => string;
+    html: (data: T) => string;
 }
 
-// ฟังก์ชันห่อหุ้มธีมหลัก (Header & Footer)
+// --- 4. Wrapper & Templates ---
+
 const wrapHtml = (title: string, content: string) => {
     return `
-    <!DOCTYPE html>
-    <html>
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta name="color-scheme" content="light">
+        <meta name="supported-color-schemes" content="light">
         <title>${title}</title>
+        <style>
+            /* Reset */
+            body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+            table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+            img { -ms-interpolation-mode: bicubic; }
+            
+            /* Force Light Mode */
+            :root {
+                color-scheme: light;
+                supported-color-schemes: light;
+            }
+            body {
+                margin: 0; padding: 0; width: 100% !important;
+                background-color: ${THEME.bg} !important;
+            }
+        </style>
     </head>
-    <body style="margin: 0; padding: 0; background-color: ${THEME.bg}; font-family: 'Prompt', 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased;">
-        
-        <table width="100%" border="0" cellspacing="0" cellpadding="0">
-            <tr>
-                <td align="center" style="padding: 40px 20px;">
-                
-                    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: ${THEME.white}; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);">
+    <body bgcolor="${THEME.bg}" style="margin: 0; padding: 0; background-color: ${THEME.bg}; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <center style="width: 100%; background-color: ${THEME.bg};">
+            <div style="display: none; font-size: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all; font-family: sans-serif;">
+                ${title} - Mangrove Run 2026
+            </div>
+            
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; padding: 20px;">
+                <tr>
+                    <td align="center" bgcolor="${THEME.card}" style="border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 40px; overflow: hidden;">
                         
-                        <tr>
-                            <td style="background-color: ${THEME.primary}; padding: 40px 30px; text-align: center; background-image: url('https://www.transparenttextures.com/patterns/cubes.png');">
-                                <h1 style="color: ${THEME.accent}; margin: 0; font-size: 28px; letter-spacing: 2px; text-transform: uppercase; font-weight: 800; line-height: 1.2;">
-                                    Mangrove Run<br/>
-                                    <span style="color: #ffffff; font-size: 20px; font-weight: 300;">2026</span>
-                                </h1>
-                            </td>
-                        </tr>
+                        <!-- Header -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td align="center" style="padding-bottom: 30px; border-bottom: 2px solid ${THEME.bg};">
+                                    <h1 style="margin: 0; color: ${THEME.primary}; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; text-transform: uppercase;">
+                                        Mangrove Run 2026
+                                    </h1>
+                                </td>
+                            </tr>
+                        </table>
 
-                        <tr>
-                            <td style="padding: 40px 30px;">
-                                ${content}
-                            </td>
-                        </tr>
+                        <!-- Content -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td style="padding-top: 30px; color: ${THEME.text}; font-size: 16px; line-height: 1.6;">
+                                    ${content}
+                                </td>
+                            </tr>
+                        </table>
 
-                        <tr>
-                            <td style="background-color: #f1f5f9; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">
-                                <p style="margin: 0 0 10px; color: ${THEME.text}; font-size: 14px; font-weight: 600;">Mangrove Run 2026 Team</p>
-                                <p style="margin: 0; color: #94a3b8; font-size: 12px;">
-                                    ติดต่อสอบถาม: contact@mangroverun.com | Facebook Page
-                                </p>
-                            </td>
-                        </tr>
-                    </table>
+                        <!-- Footer -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td align="center" style="padding-top: 40px; color: ${THEME.muted}; font-size: 12px;">
+                                    <p style="margin: 0;">&copy; 2026 Mangrove Run. All rights reserved.</p>
+                                    <p style="margin: 5px 0 0;">This email was sent automatically.</p>
+                                </td>
+                            </tr>
+                        </table>
 
-                </td>
-            </tr>
-        </table>
-
+                    </td>
+                </tr>
+            </table>
+        </center>
     </body>
     </html>
     `;
 };
 
-export const EMAIL_TEMPLATES: Record<EmailType, EmailTemplate> = {
+// Strictly Typed Templates Map
+export const EMAIL_TEMPLATES: { [K in EmailType]: EmailTemplate<EmailPayloads[K]> } = {
     submission: {
-        subject: '📝 ได้รับข้อมูลการสมัคร - Mangrove Run 2026',
-        html: (input: unknown) => {
-            const data = input as SubmissionData;
+        subject: '📝 Subscription Confirmed - รอการตรวจสอบ',
+        html: (data) => {
             const content = `
-                <h2 style="color: ${THEME.primary}; margin-top: 0; font-size: 22px;">สวัสดีคุณ ${data.name},</h2>
-                <p style="color: ${THEME.text}; font-size: 16px; line-height: 1.6;">
-                    เราได้รับข้อมูลการสมัครของคุณเรียบร้อยแล้ว! 🎉 <br>
-                    ขณะนี้ทีมงานกำลังตรวจสอบหลักฐานการโอนเงิน (Payment Slip)
-                </p>
+                <h2 style="margin: 0 0 16px; color: ${THEME.primary}; font-size: 20px;">สวัสดีคุณ ${data.name},</h2>
+                <p style="margin: 0 0 24px;">เราได้รับข้อมูลการสมัครของคุณเรียบร้อยแล้ว ขณะนี้ทีมงานกำลังตรวจสอบหลักฐานการโอนเงิน</p>
                 
-                <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
-                    <p style="margin: 0; color: #b45309; font-weight: bold;">⏳ สถานะ: รอการตรวจสอบ</p>
-                    <p style="margin: 5px 0 0; color: #92400e; font-size: 14px;">กรุณารออีเมลยืนยันผลการตรวจสอบภายใน 24-48 ชั่วโมง</p>
-                </div>
+                <table width="100%" bgcolor="#fff7ed" cellpadding="0" cellspacing="0" style="border-radius: 12px; border: 1px solid #ffedd5;">
+                    <tr>
+                        <td style="padding: 20px;">
+                            <p style="margin: 0; color: #9a3412; font-weight: bold; font-size: 14px; text-transform: uppercase;">status</p>
+                            <p style="margin: 4px 0 0; color: #c2410c; font-size: 18px; font-weight: bold;">⏳ PENDING REVIEW</p>
+                        </td>
+                    </tr>
+                </table>
 
-                <p style="color: ${THEME.text}; font-size: 16px;">ขอบคุณที่มาร่วมเป็นส่วนหนึ่งในการวิ่งครั้งนี้ครับ</p>
+                <p style="margin: 24px 0 0; font-size: 14px; color: ${THEME.muted};">กรุณารอผลยืนยันภายใน 24 ชม.</p>
             `;
             return wrapHtml('ได้รับข้อมูลการสมัคร', content);
         }
     },
     approval: {
-        subject: '✅ การสมัครเสร็จสมบูรณ์ - พบกันวันงาน!',
-        html: (input: unknown) => {
-            const data = input as ApprovalData;
+        subject: '✅ Registration Approved - สมัครสำเร็จ!',
+        html: (data) => {
             const content = `
-                <div style="text-align: center; margin-bottom: 30px;">
-                     <div style="display: inline-block; background-color: #dcfce7; color: #15803d; padding: 8px 16px; border-radius: 50px; font-size: 14px; font-weight: bold; margin-bottom: 20px;">
-                        APPROVED / อนุมัติแล้ว
+                <div style="text-align: center;">
+                    <div style="display: inline-block; background-color: #dcfce7; color: #15803d; padding: 12px; border-radius: 50%; margin-bottom: 20px;">
+                        <!-- Checkmark Icon fallback -->
+                        <span style="font-size: 32px; line-height: 1;">✓</span>
                     </div>
-                    <h2 style="color: ${THEME.primary}; margin: 0; font-size: 24px;">ยินดีด้วยคุณ ${data.name}!</h2>
-                    <p style="color: #64748b; margin-top: 8px;">การสมัครของคุณเสร็จสมบูรณ์เรียบร้อย</p>
+                    <h2 style="margin: 0 0 10px; color: ${THEME.primary}; font-size: 24px;">Registration Approved</h2>
+                    <p style="margin: 0 0 30px; color: ${THEME.muted};">ยินดีด้วย! การสมัครของคุณสมบูรณ์แล้ว</p>
                 </div>
 
-                <div style="background: linear-gradient(135deg, ${THEME.primary} 0%, #1e293b 100%); border-radius: 16px; padding: 30px; color: white; text-align: center; margin: 30px 0; box-shadow: 0 10px 20px rgba(0,0,0,0.2); position: relative; overflow: hidden;">
-                    
-                    <div style="position: absolute; top: -50px; right: -50px; width: 100px; height: 100px; background-color: ${THEME.accent}; opacity: 0.2; border-radius: 50%;"></div>
-                    
-                    <p style="margin: 0; color: ${THEME.accent}; font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">RACE CATEGORY</p>
-                    <h3 style="margin: 5px 0 20px; font-size: 24px; color: white;">${data.raceCategory}</h3>
-                    
-                    <div style="background-color: rgba(255,255,255,0.1); border: 2px solid ${THEME.accent}; padding: 15px 30px; display: inline-block; border-radius: 12px;">
-                        <span style="display: block; font-size: 12px; color: #94a3b8; margin-bottom: 5px;">YOUR BIB NUMBER</span>
-                        <span style="display: block; font-size: 48px; font-weight: 800; line-height: 1; color: white; font-family: 'Courier New', monospace; letter-spacing: -2px;">
-                            ${data.bib}
-                        </span>
-                    </div>
-                </div>
+                <table width="100%" bgcolor="#f0fdf4" cellpadding="0" cellspacing="0" style="border-radius: 16px; border: 1px solid #bbf7d0; overflow: hidden; margin-bottom: 30px;">
+                    <tr>
+                        <td align="center" style="padding: 40px 20px;">
+                            <p style="margin: 0 0 5px; color: #15803d; font-size: 12px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">BIB NUMBER</p>
+                            <p style="margin: 0; color: #166534; font-size: 48px; font-weight: 800; letter-spacing: -2px; line-height: 1;">${data.bib}</p>
+                            
+                            <div style="height: 1px; background-color: #bbf7d0; width: 60px; margin: 20px auto;"></div>
+                            
+                            <p style="margin: 0; color: #15803d; font-weight: bold;">${data.raceCategory}</p>
+                            <p style="margin: 5px 0 0; font-size: 14px; color: #15803d;">${data.name}</p>
+                        </td>
+                    </tr>
+                </table>
 
-                <p style="color: ${THEME.text}; text-align: center; font-size: 14px; margin-top: 30px;">
-                    กรุณาแสดงอีเมลนี้ (หรือแจ้งชื่อ-นามสกุล) <br>เพื่อรับเสื้อและ BIB ตามวันเวลาที่กำหนด
-                </p>
-
-                <div style="text-align: center; margin-top: 30px;">
-                    <a href="https://mangroverun.com" style="background-color: ${THEME.primary}; color: ${THEME.accent}; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; font-size: 16px; display: inline-block; transition: all 0.3s;">เข้าสู่เว็บไซต์</a>
-                </div>
+                <p style="text-align: center; color: ${THEME.text}; font-size: 14px;"><strong>โปรดบันทึกภาพหน้าจอนี้</strong> เพื่อใช้ยืนยันการรับเสื้อและ BIB ที่หน้างาน</p>
             `;
             return wrapHtml('การสมัครเสร็จสมบูรณ์', content);
         }
     },
     rejection: {
-        subject: '⚠️ แจ้งผลการตรวจสอบการชำระเงิน - Mangrove Run 2026',
-        html: (input: unknown) => {
-            const data = input as RejectionData;
+        subject: '⚠️ Action Required - แจ้งผลการตรวจสอบ',
+        html: (data) => {
             const content = `
-                <div style="text-align: center; margin-bottom: 30px;">
-                     <div style="display: inline-block; background-color: #fee2e2; color: #991b1b; padding: 8px 16px; border-radius: 50px; font-size: 14px; font-weight: bold; margin-bottom: 20px;">
-                        PAYMENT REJECTED / ไม่ผ่านการตรวจสอบ
-                    </div>
-                    <h2 style="color: ${THEME.primary}; margin: 0; font-size: 24px;">เรียนคุณ ${data.name}</h2>
-                    <p style="color: #64748b; margin-top: 8px;">พบปัญหาเกี่ยวกับหลักฐานการโอนเงินของคุณ</p>
-                </div>
+                <h2 style="margin: 0 0 16px; color: #dc2626; font-size: 20px;">Payment Issue Requires Action</h2>
+                <p style="margin: 0 0 24px;">เรียนคุณ ${data.name}, เราไม่สามารถอนุมัติการสมัครของคุณได้เนื่องจากเหตุผลดังนี้:</p>
+                
+                <table width="100%" bgcolor="#fef2f2" cellpadding="0" cellspacing="0" style="border-radius: 12px; border: 1px solid #fee2e2;">
+                    <tr>
+                        <td style="padding: 20px;">
+                            <p style="margin: 0; color: #991b1b; font-weight: bold; font-size: 14px; text-transform: uppercase;">Reason</p>
+                            <p style="margin: 8px 0 0; color: #b91c1c; font-size: 16px;">
+                                "${data.reason || 'หลักฐานไม่ถูกต้อง'}"
+                            </p>
+                        </td>
+                    </tr>
+                </table>
 
-                <div style="background-color: #fff1f2; border-left: 4px solid #f43f5e; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
-                    <p style="margin: 0; color: #881337; font-weight: bold; font-size: 16px;">สาเหตุที่ไม่อนุมัติ:</p>
-                    <p style="margin: 5px 0 0; color: #be123c; font-size: 16px;">
-                        "${data.reason || 'หลักฐานการโอนเงินไม่ถูกต้อง หรือยอดเงินไม่ตรงกับรายการสมัคร'}"
-                    </p>
-                </div>
-
-                <p style="color: ${THEME.text}; font-size: 16px; line-height: 1.6; text-align: center;">
-                    กรุณาตรวจสอบข้อมูลและทำการแนบหลักฐานการโอนเงินใหม่อีกครั้งผ่านลิงก์ด้านล่าง <br>
-                    หรือติดต่อเจ้าหน้าที่หากมีข้อสงสัย
-                </p>
-
-                <div style="text-align: center; margin-top: 30px;">
-                    <a href="https://mangroverun.com/check-status" style="background-color: ${THEME.text}; color: white; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; font-size: 16px; display: inline-block; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                        ส่งหลักฐานใหม่ / ตรวจสอบสถานะ
+                <p style="margin: 30px 0 0; text-align: center;">
+                    <a href="https://mangroverun.com/check-status" style="background-color: ${THEME.primary}; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
+                        ส่งหลักฐานใหม่ (Upload Slip)
                     </a>
-                </div>
+                </p>
             `;
             return wrapHtml('แจ้งผลการตรวจสอบ', content);
         }
     }
 };
 
-export async function sendEmail({ to, type, data }: { to: string, type: EmailType, data: EmailData }) {
+interface SendEmailParams<K extends EmailType> {
+    to: string;
+    type: K;
+    data: EmailPayloads[K];
+    attachments?: any[];
+}
+
+export async function sendEmail<K extends EmailType>({ to, type, data, attachments }: SendEmailParams<K>) {
     if (!SMTP_HOST || !SMTP_USER) {
-        // ใช้ console.error เพื่อให้เห็นชัดใน log เวลา deploy
-        console.error('⚠️ SMTP Config missing. Email cannot be sent.', { to, type });
-        return { success: false, error: 'SMTP Config missing' };
+        return { success: false, error: 'SMTP Configuration Missing' };
     }
 
     try {
         const template = EMAIL_TEMPLATES[type];
-        if (!template) throw new Error(`Invalid email type: ${type}`);
 
         const info = await transporter.sendMail({
             from: SMTP_FROM,
             to,
             subject: template.subject,
             html: template.html(data),
+            attachments
         });
 
-        console.log(`📧 Email sent successfully: ${info.messageId}`);
+        console.log(`📧 [${type}] Email sent to ${to}: ${info.messageId}`);
         return { success: true, messageId: info.messageId };
-    } catch (error) {
-        console.error('❌ Error sending email:', error);
-        return { success: false, error };
+
+    } catch (error: any) {
+        console.error(`❌ Error sending [${type}] email to ${to}:`, error.message);
+        return { success: false, error: error.message };
     }
 }
