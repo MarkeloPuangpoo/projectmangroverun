@@ -14,7 +14,7 @@ export const translations = {
             subtitle: "บางปะกง เดิน-วิ่ง เพื่อสุขภาพและอนุรักษ์ป่าชายเลน ครั้งที่ 3",
             location: "สถานที่: โรงเรียนบางปะกง \"บวรวิทยายน\"",
             register: "สมัครเข้าร่วมแข่งขัน",
-            moreDetail: "ดูรายละเอียดเพิ่มเติม",
+            moreDetail: "เช็คสถานะ",
             days: "วัน",
             hours: "ชม.",
             minutes: "นาที",
@@ -89,32 +89,107 @@ export const translations = {
             }
         },
         routes: {
+            badge: "แผนที่เส้นทาง",
             title: "เส้นทางวิ่ง",
-            overview: "ภาพรวมเส้นทาง",
-            startFinish: "จุดเริ่มต้น / เส้นชัย",
-            startLocation: "สวนสาธารณะป่าชายเลน",
-            checkPoints: "จุดเช็คพอยท์",
-            waterStations: "จุดให้น้ำทุก 2 กม.",
-            mapReview: "ดูแผนที่",
-            desc10: "จุดเริ่มต้นจากสวนป่าชายเลน มุ่งหน้าขึ้นเหนือเลียบแม่น้ำ กลับตัวที่ร้านอาหารแพเคียงน้ำ และกลับมายังเส้นชัย",
-            desc6: "เส้นทางชมชุมชน กลับตัวที่ซอยเทศบาลท่าข้าม 4 เหมาะสำหรับมือใหม่",
-            desc5: "เดิน-วิ่ง สบายๆ รับลมเย็น กลับตัวกลางสะพานข้ามแม่น้ำบางปะกง",
+            highlight: "ชมธรรมชาติ",
+            uTurnLabel: "จุดกลับตัว (U-Turn Point)",
+            mapCard: {
+                titlePrefix: "แผนที่ระยะ",
+                hint: "คลิกเพื่อดูภาพขยาย หรือ เปิด Google Maps",
+                btnZoom: "ดูรูปภาพ",
+                btnGoogle: "Google Maps"
+            },
+            details: {
+                '10.5KM': {
+                    title: 'Mini Marathon',
+                    distance: '10.5 KM',
+                    description: "เส้นทางเลียบแม่น้ำบางปะกง สัมผัสธรรมชาติและวิถีชีวิตท้องถิ่น",
+                    uTurn: "กลับตัวที่ร้านอาหารแพเคียงน้ำ (ครึ่งทาง)",
+                    landmarks: [
+                        { name: "โรงเรียนบางปะกง (Start)" },
+                        { name: "สถานีตำรวจ / โรงพยาบาลบางปะกง" },
+                        { name: "ปั๊ม PTT / ไปรษณีย์" },
+                        { name: "ข้ามแม่น้ำบางปะกง" },
+                        { name: "ร้านอาหารแพเคียงน้ำ (U-Turn)" }
+                    ]
+                },
+                '6KM': {
+                    title: 'Fun Run',
+                    distance: '6 KM',
+                    description: "เส้นทางสนุกสนาน วิ่งสบายๆ ผ่านชุมชนและสถานที่สำคัญ",
+                    uTurn: "กลับตัวบริเวณทางแยกเข้าซอยเทศบาลท่าข้าม 4",
+                    landmarks: [
+                        { name: "โรงเรียนบางปะกง (Start)" },
+                        { name: "โรงพยาบาลบางปะกง" },
+                        { name: "ปั๊ม PTT / ไปรษณีย์" },
+                        { name: "แยกซอยเทศบาลท่าข้าม 4 (U-Turn)" }
+                    ]
+                },
+                '5KM': {
+                    title: 'Walk-Run',
+                    distance: '5 KM',
+                    description: "เดิน-วิ่งเพื่อสุขภาพ ชมวิวแม่น้ำบนสะพานบางปะกง",
+                    uTurn: "กลับตัวครึ่งทางบริเวณกลางสะพานข้ามแม่น้ำ",
+                    landmarks: [
+                        { name: "โรงเรียนบางปะกง (Start)" },
+                        { name: "โรงพยาบาลบางปะกง" },
+                        { name: "ปั๊ม PTT" },
+                        { name: "กลางสะพานแม่น้ำบางปะกง (U-Turn)" }
+                    ]
+                }
+            }
         },
         awards: {
-            awardsTitle: "รางวัล",
-            awardsSubtitle: "ประเภทการแข่งขันและกลุ่มอายุสำหรับ มินิมาราธอน (10.5 กม.)",
-            category: "ประเภท",
-            ageGroup: "กลุ่มอายุ (ปี)",
-            male: "ชาย",
-            female: "หญิง",
-            rulesTitle: "กติกา",
-            rulesSubtitle: "กฎกติกาที่สำคัญสำหรับผู้เข้าร่วม",
-            rule1Title: "สัญชาติ & ถ้วยรางวัล",
-            rule1Desc: "ถ้วยรางวัล Over All สงวนสิทธิ์สำหรับ **คนไทยเท่านั้น** นักวิ่งต่างชาติสามารถเข้าร่วมและรับเหรียญรางวัลได้ แต่ไม่มีสิทธิ์รับถ้วยรางวัลหลัก",
-            rule2Title: "ข้อจำกัดอายุ",
-            rule2Desc: "เด็กอายุต่ำกว่า 12 ปี ต้องมีผู้ปกครองดูแลตลอดการแข่งขัน",
-            rule3Title: "เวลาเช็คอิน",
-            rule3Desc: "นักวิ่งต้องมารายงานตัวอย่างน้อย 30 นาทีก่อนเวลาปล่อยตัว",
+            badge: "Motivation & Rules",
+            title: "รางวัลและความภูมิใจ",
+            subOne: "นักวิ่งทุกคนมีสิทธิ์ลุ้นถ้วยรางวัลตามรุ่นอายุ",
+            subTwo: "ยกเว้น Overall ที่จำกัดเฉพาะสัญชาติไทย",
+            overall: {
+                title: "Overall Champion",
+                distance: "ระยะ Mini Marathon 10.5 KM",
+                trophy: "ถ้วยรางวัลเกียรติยศ (แยกชาย/หญิง)",
+                conditionPrefix: "สงวนสิทธิ์เฉพาะ",
+                conditionHighlight: "สัญชาติไทย",
+                conditionSuffix: "เท่านั้น"
+            },
+            ageGroup: {
+                title: "Age Group Winners",
+                distance: "ระยะ 10.5 KM & 6 KM",
+                trophy: "ถ้วยรางวัล อันดับ 1 - 3 (ทุกรุ่นอายุ)",
+                desc: "แบ่งกลุ่ม ชาย/หญิง ตามช่วงอายุมาตรฐาน"
+            },
+            fancy: {
+                title: "Fancy Run Special",
+                desc: "รางวัลพิเศษสำหรับชุดแฟนซี (ไม่จำกัดรุ่นอายุ)",
+                winner: "Winner",
+                second: "2nd",
+                third: "3rd"
+            },
+            ageTable: {
+                title: "ตรวจสอบรุ่นอายุของคุณ",
+                inputLabel: "ระบุอายุ:",
+                placeholder: "Age",
+                columns: {
+                    range: "Age Range",
+                    male: "Male",
+                    female: "Female"
+                },
+                feedback: {
+                    kids: "น้องๆ อายุต่ำกว่า 12 ปี ต้องวิ่งพร้อมผู้ปกครองครับ (Kids Run)",
+                    eligible: "คุณมีสิทธิ์ลุ้นรางวัลในรุ่นที่ไฮไลท์ไว้! 🎯"
+                }
+            },
+            rules: {
+                title: "กติกาสำคัญที่ควรรู้",
+                kids: {
+                    title: "นักวิ่งรุ่นจิ๋ว (ต่ำกว่า 12 ปี)",
+                    desc: "สามารถร่วมกิจกรรมได้ปกติ แต่ต้องอยู่ในการดูแลของผู้ปกครองตลอดเส้นทางเพื่อความปลอดภัย"
+                },
+                general: {
+                    title: "กฎเหล็กการแข่งขัน",
+                    desc: "ต้องติด BIB ด้านหน้าให้เห็นชัดเจน, ห้ามใช้พาหนะทุ่นแรง, และคำตัดสินของกรรมการถือเป็นที่สิ้นสุด"
+                }
+            }
         },
         objective: {
             missionBadge: "พันธกิจของเรา",
@@ -131,12 +206,82 @@ export const translations = {
                 { title: "ส่งเสริมสุขภาพ", desc: "สนับสนุนการออกกำลังกายเพื่อสุขภาพที่แข็งแรง" }
             ]
         },
+        faq: {
+            title: "คำถามที่พบบ่อย (FAQ)",
+            subtitle: "ข้อสงสัยเกี่ยวกับการแข่งขัน การเดินทาง และบริการต่างๆ",
+            items: [
+                {
+                    category: "General",
+                    question: "งานจัดที่ไหน และปล่อยตัวกี่โมง?",
+                    answer: "งานจัดที่ โรงเรียนบางปะกง \"บวรวิทยายน\" เวลาปล่อยตัว: 10.5KM (05:45 น.), 6KM (06:05 น.) และ 5KM (06:15 น.)"
+                },
+                {
+                    category: "Services",
+                    question: "มีสถานที่จอดรถให้บริการหรือไม่?",
+                    answer: "มีจุดจอดรถรองรับหลายจุด ได้แก่: 1. สภ.บางปะกง 2. ปั๊ม Esso 3. กรมพัฒนาที่ดินฉะเชิงเทรา 4. ด่านกักกันสัตว์ฉะเชิงเทรา"
+                },
+                {
+                    category: "Race Kit",
+                    question: "รับเสื้อและ BIB ได้ที่ไหน?",
+                    answer: "สามารถเลือกรับได้ 2 ช่องทาง: 1. รับด้วยตนเอง ณ โรงเรียนบางปะกง 'บวรวิทยายน' (24-25 พ.ค.) 2. จัดส่งทางไปรษณีย์ (ค่าจัดส่ง 50 บาท)"
+                },
+                {
+                    category: "Rules",
+                    question: "เด็กเข้าร่วมกิจกรรมได้หรือไม่?",
+                    answer: "ได้ครับ เด็กอายุต่ำกว่า 12 ปี สามารถสมัครได้ แต่ต้องอยู่ภายใต้การดูแลของผู้ปกครองตลอดเวลาเพื่อความปลอดภัย"
+                },
+                {
+                    category: "Policy",
+                    question: "สมัครแล้วขอคืนเงินได้หรือไม่?",
+                    answer: "ขอสงวนสิทธิ์ไม่คืนเงินค่าสมัครทุกกรณี แต่สามารถโอนสิทธิ์ให้ผู้อื่นได้ (มีค่าธรรมเนียมการโอนสิทธิ์)"
+                }
+            ],
+            support: {
+                text: "ยังไม่พบคำตอบที่คุณต้องการ?",
+                button: "ติดต่อทีมงาน (Contact Support)"
+            }
+        },
         footer: {
             desc: "มาร่วมวิ่งสัมผัสธรรมชาติ ความสวยงามของป่าชายเลน และท้าทายขีดจำกัดของคุณ จัดด้วยใจเพื่อชุมชนและสิ่งแวดล้อม",
             contact: "ติดต่อเรา",
             follow: "ติดตามเรา",
             school: "โรงเรียนบางปะกง \"บวรวิทยายน\"",
             rights: "สงวนลิขสิทธิ์",
+        },
+        checkStatus: {
+            title: "ตรวจสอบสถานะ",
+            subtitle: "สถานะการชำระเงิน",
+            searchLabel: "ค้นหาด้วย เบอร์โทร หรือ เลขบัตรประชาชน",
+            placeholder: "เบอร์โทร หรือ เลขบัตรประชาชน",
+            buttonCheck: "ตรวจสอบ",
+            status: {
+                pending: "กำลังตรวจสอบ",
+                approved: "อนุมัติแล้ว",
+                rejected: "ถูกปฏิเสธ"
+            },
+            desc: {
+                pending: "เจ้าหน้าที่กำลังตรวจสอบหลักฐานการโอนเงิน (ใช้เวลา 1-2 วัน)",
+                approved: "การชำระเงินเรียบร้อย ท่านได้รับสิทธิ์เข้าร่วมแข่งขัน",
+                rejected: "หลักฐานการชำระเงินไม่ถูกต้อง กรุณาตรวจสอบอีเมลหรือแนบหลักฐานใหม่"
+            },
+            action: {
+                download: "ดาวน์โหลด E-Ticket",
+                reupload: "แนบสลิปใหม่ (Re-upload)",
+                cancel: "ยกเลิก",
+                uploadTitle: "อัปโหลดสลิปใหม่"
+            },
+            info: {
+                name: "ชื่อผู้สมัคร",
+                category: "ประเภทวิ่ง",
+                size: "ขนาดเสื้อ",
+                bib: "BIB Number"
+            },
+            alert: {
+                notFound: "ไม่พบข้อมูลผู้สมัครในระบบ",
+                success: "ส่งหลักฐานใหม่เรียบร้อย!",
+                uploading: "กำลังอัปโหลด...",
+                updateFailed: "อัปเดตสถานะไม่สำเร็จ"
+            }
         }
     },
     en: {
@@ -154,7 +299,7 @@ export const translations = {
             subtitle: "Bang Pakong Walk-Run for Health & Mangrove Conservation 3rd Ed.",
             location: "Location: Bangpakong \"Bowonwittayayon\" School",
             register: "Register Now",
-            moreDetail: "More Details",
+            moreDetail: "Check Status",
             days: "Days",
             hours: "Hrs",
             minutes: "Mins",
@@ -229,32 +374,107 @@ export const translations = {
             }
         },
         routes: {
-            title: "ROUTE MAPS",
-            overview: "Route Overview",
-            startFinish: "Start / Finish",
-            startLocation: "Mangrove Forest Park",
-            checkPoints: "Check Points",
-            waterStations: "Water stations every 2 KM",
-            mapReview: "Map Review",
-            desc10: "Start from the Mangrove Forest Park, heading north along the river. U-turn at Pae Kieng Nam Restaurant and return to the finish line.",
-            desc6: "Scenic route through the local community. U-turn at Soi Thesaban Tha Kham 4. Perfect for beginners.",
-            desc5: "Relaxed Walk-Run route. Enjoy the breeze with a U-turn at the middle of Bang Pakong River Bridge.",
+            badge: "Course Map",
+            title: "Running Routes",
+            highlight: "Nature View",
+            uTurnLabel: "U-Turn Point",
+            mapCard: {
+                titlePrefix: "Map Distance",
+                hint: "Click to zoom or open Google Maps",
+                btnZoom: "View Image",
+                btnGoogle: "Google Maps"
+            },
+            details: {
+                '10.5KM': {
+                    title: 'Mini Marathon',
+                    distance: '10.5 KM',
+                    description: "Route along the Bang Pakong River, experiencing nature and local life.",
+                    uTurn: "U-turn at Pae Kieng Nam Restaurant (Halfway)",
+                    landmarks: [
+                        { name: "Bang Pakong School (Start)" },
+                        { name: "Police Station / Hospital" },
+                        { name: "PTT Station / Post Office" },
+                        { name: "Cross Bang Pakong River" },
+                        { name: "Pae Kieng Nam Restaurant (U-Turn)" }
+                    ]
+                },
+                '6KM': {
+                    title: 'Fun Run',
+                    distance: '6 KM',
+                    description: "Fun route through the community and important landmarks.",
+                    uTurn: "U-turn at Soi Thesaban Tha Kham 4 junction",
+                    landmarks: [
+                        { name: "Bang Pakong School (Start)" },
+                        { name: "Bang Pakong Hospital" },
+                        { name: "PTT Station / Post Office" },
+                        { name: "Soi Thesaban Tha Kham 4 (U-Turn)" }
+                    ]
+                },
+                '5KM': {
+                    title: 'Walk-Run',
+                    distance: '5 KM',
+                    description: "Walk-Run for health, enjoying the river view on the bridge.",
+                    uTurn: "U-turn halfway on the bridge",
+                    landmarks: [
+                        { name: "Bang Pakong School (Start)" },
+                        { name: "Bang Pakong Hospital" },
+                        { name: "PTT Station" },
+                        { name: "Middle of River Bridge (U-Turn)" }
+                    ]
+                }
+            }
         },
         awards: {
-            awardsTitle: "AWARDS",
-            awardsSubtitle: "Competition Categories and Age Groups for Mini Marathon (10.5 KM)",
-            category: "Category",
-            ageGroup: "Age Group (Years)",
-            male: "Male",
-            female: "Female",
-            rulesTitle: "RULES",
-            rulesSubtitle: "Important regulations for all participants",
-            rule1Title: "Nationality & Trophies",
-            rule1Desc: "Over All Trophies are reserved for **Thai nationals only**. International runners are welcome to join and receive medals but are not eligible for the main trophies.",
-            rule2Title: "Age Restrictions",
-            rule2Desc: "Children under 12 must be accompanied by a guardian at all times during the race.",
-            rule3Title: "Check-in Time",
-            rule3Desc: "All runners must check in at least 30 minutes before their race category start time.",
+            badge: "Motivation & Rules",
+            title: "Awards & Pride",
+            subOne: "Everyone is eligible for Age Group trophies",
+            subTwo: "except Overall which is reserved for Thai nationals.",
+            overall: {
+                title: "Overall Champion",
+                distance: "Mini Marathon 10.5 KM",
+                trophy: "Prestige Trophy (Male/Female)",
+                conditionPrefix: "Reserved for",
+                conditionHighlight: "Thai Nationals",
+                conditionSuffix: "only"
+            },
+            ageGroup: {
+                title: "Age Group Winners",
+                distance: "Distance 10.5 KM & 6 KM",
+                trophy: "Trophies for 1st - 3rd Place (All Age Groups)",
+                desc: "Categorized by Male/Female and standard age groups"
+            },
+            fancy: {
+                title: "Fancy Run Special",
+                desc: "Special prizes for Fancy Costumes (Open to all ages)",
+                winner: "Winner",
+                second: "2nd",
+                third: "3rd"
+            },
+            ageTable: {
+                title: "Check Your Age Group",
+                inputLabel: "Your Age:",
+                placeholder: "Age",
+                columns: {
+                    range: "Age Range",
+                    male: "Male",
+                    female: "Female"
+                },
+                feedback: {
+                    kids: "Children under 12 must run with a guardian (Kids Run).",
+                    eligible: "You are eligible for the highlighted group! 🎯"
+                }
+            },
+            rules: {
+                title: "Important Rules",
+                kids: {
+                    title: "Young Runners (Under 12)",
+                    desc: "Can participate but must be accompanied by a guardian at all times for safety."
+                },
+                general: {
+                    title: "Race Rules",
+                    desc: "BIB must be visible on front, no wheeled vehicles allowed, and judges' decision is final."
+                }
+            }
         },
         objective: {
             missionBadge: "Our Mission",
@@ -271,12 +491,82 @@ export const translations = {
                 { title: "Health & Wellness", desc: "Promote physical exercise and good health." }
             ]
         },
+        faq: {
+            title: "Frequently Asked Questions (FAQ)",
+            subtitle: "Common questions about the race, location, and services.",
+            items: [
+                {
+                    category: "General",
+                    question: "Where is the event and what time does it start?",
+                    answer: "The event is at Bangpakong 'Bowonwittayayon' School. Start times: 10.5KM (05:45), 6KM (06:05), and 5KM (06:15)."
+                },
+                {
+                    category: "Services",
+                    question: "Is there parking available?",
+                    answer: "Parking is available at: 1. Bang Pakong Police Station 2. Esso Station 3. Chachoengsao Land Development Station 4. Animal Quarantine Station."
+                },
+                {
+                    category: "Race Kit",
+                    question: "Where to pick up the Race Kit?",
+                    answer: "Two options: 1. Pick up at Bangpakong 'Bowonwittayayon' School (May 24-25) 2. Postal delivery (50 THB fee)."
+                },
+                {
+                    category: "Rules",
+                    question: "Can children participate?",
+                    answer: "Yes, children under 12 can register but must be accompanied by a guardian at all times."
+                },
+                {
+                    category: "Policy",
+                    question: "Is the registration fee refundable?",
+                    answer: "Registration fees are non-refundable under any circumstances, but transfers are allowed (fees apply)."
+                }
+            ],
+            support: {
+                text: "Still have questions?",
+                button: "Contact Support Team"
+            }
+        },
         footer: {
             desc: "Join us for a run through nature. Experience the beauty of the mangrove forest while challenging yourself. Organized with love for the community and environment.",
             contact: "Contact Us",
             follow: "Follow Us",
             school: "Bangpakong \"Bowonwittayayon\" School",
             rights: "All rights reserved.",
+        },
+        checkStatus: {
+            title: "Check Status",
+            subtitle: "Payment Status Check",
+            searchLabel: "Search by Phone Number or National ID",
+            placeholder: "Phone Number or National ID",
+            buttonCheck: "Check Status",
+            status: {
+                pending: "Verifying",
+                approved: "Approved",
+                rejected: "Rejected"
+            },
+            desc: {
+                pending: "Staff is verifying your payment (Takes 1-2 days).",
+                approved: "Payment successful. You are ready to race!",
+                rejected: "Payment proof is invalid. Please check your email or re-upload."
+            },
+            action: {
+                download: "Download E-Ticket",
+                reupload: "Re-upload Slip",
+                cancel: "Cancel",
+                uploadTitle: "Upload New Slip"
+            },
+            info: {
+                name: "Runner Name",
+                category: "Category",
+                size: "Shirt Size",
+                bib: "BIB Number"
+            },
+            alert: {
+                notFound: "Registration data not found.",
+                success: "Slip re-uploaded successfully.",
+                uploading: "Uploading...",
+                updateFailed: "Failed to update status."
+            }
         }
     }
 };

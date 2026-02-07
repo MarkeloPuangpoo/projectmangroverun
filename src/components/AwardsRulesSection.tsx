@@ -36,14 +36,14 @@ const AwardsRulesSection = () => {
                 {/* --- 1. HUMAN-CENTRIC SUMMARY --- */}
                 <div className="text-center mb-16 max-w-3xl mx-auto">
                     <span className="bg-orange-50 text-orange-600 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block border border-orange-100">
-                        Motivation & Rules
+                        {t.badge}
                     </span>
                     <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">
-                        รางวัลและความภูมิใจ
+                        {t.title}
                     </h2>
                     <p className="text-lg text-slate-600 font-medium leading-relaxed">
-                        นักวิ่งทุกคนมีสิทธิ์ลุ้นถ้วยรางวัลตามรุ่นอายุ <span className="text-slate-400 mx-2">|</span>
-                        <span className="text-indigo-600 font-bold"> ยกเว้น Overall ที่จำกัดเฉพาะสัญชาติไทย</span>
+                        {t.subOne} <span className="text-slate-400 mx-2">|</span>
+                        <span className="text-indigo-600 font-bold"> {t.subTwo}</span>
                     </p>
                 </div>
 
@@ -59,18 +59,18 @@ const AwardsRulesSection = () => {
                             <div className="w-14 h-14 bg-yellow-400 rounded-2xl flex items-center justify-center text-slate-900 mb-6 shadow-lg shadow-yellow-400/50">
                                 <Crown size={28} strokeWidth={2.5} />
                             </div>
-                            <h3 className="text-3xl font-black mb-2">Overall Champion</h3>
-                            <p className="text-yellow-400 font-bold mb-6 text-sm uppercase tracking-wide">ระยะ Mini Marathon 10.5 KM</p>
+                            <h3 className="text-3xl font-black mb-2">{t.overall.title}</h3>
+                            <p className="text-yellow-400 font-bold mb-6 text-sm uppercase tracking-wide">{t.overall.distance}</p>
 
                             <ul className="space-y-4 mb-8">
                                 <li className="flex items-start gap-3">
                                     <Trophy className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
-                                    <span className="font-medium text-slate-200">ถ้วยรางวัลเกียรติยศ (แยกชาย/หญิง)</span>
+                                    <span className="font-medium text-slate-200">{t.overall.trophy}</span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <AlertTriangle className="w-5 h-5 text-orange-400 shrink-0 mt-0.5" />
                                     <span className="text-sm text-slate-300">
-                                        สงวนสิทธิ์เฉพาะ <strong className="text-white">สัญชาติไทย</strong> เท่านั้น
+                                        {t.overall.conditionPrefix} <strong className="text-white">{t.overall.conditionHighlight}</strong> {t.overall.conditionSuffix}
                                     </span>
                                 </li>
                             </ul>
@@ -86,18 +86,18 @@ const AwardsRulesSection = () => {
                             <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-6">
                                 <Trophy size={28} strokeWidth={2.5} />
                             </div>
-                            <h3 className="text-3xl font-black text-slate-900 mb-2">Age Group Winners</h3>
-                            <p className="text-slate-400 font-bold mb-6 text-sm uppercase tracking-wide">ระยะ 10.5 KM & 6 KM</p>
+                            <h3 className="text-3xl font-black text-slate-900 mb-2">{t.ageGroup.title}</h3>
+                            <p className="text-slate-400 font-bold mb-6 text-sm uppercase tracking-wide">{t.ageGroup.distance}</p>
 
                             <ul className="space-y-4 mb-8">
                                 <li className="flex items-start gap-3">
                                     <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                                    <span className="font-medium text-slate-700">ถ้วยรางวัล อันดับ 1 - 3 (ทุกรุ่นอายุ)</span>
+                                    <span className="font-medium text-slate-700">{t.ageGroup.trophy}</span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <Users className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
                                     <span className="text-sm text-slate-500">
-                                        แบ่งกลุ่ม ชาย/หญิง ตามช่วงอายุมาตรฐาน
+                                        {t.ageGroup.desc}
                                     </span>
                                 </li>
                             </ul>
@@ -114,14 +114,14 @@ const AwardsRulesSection = () => {
                         <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-lg h-full">
                             <div className="px-6 py-5 border-b border-slate-100 flex flex-wrap gap-4 items-center justify-between bg-slate-50/50">
                                 <h4 className="font-bold text-slate-800 flex items-center gap-2">
-                                    <Users className="w-5 h-5 text-slate-400" /> ตรวจสอบรุ่นอายุของคุณ
+                                    <Users className="w-5 h-5 text-slate-400" /> {t.ageTable.title}
                                 </h4>
                                 {/* Interactive Input */}
                                 <div className="flex items-center gap-2">
-                                    <span className="text-xs font-bold text-slate-400 uppercase">ระบุอายุ:</span>
+                                    <span className="text-xs font-bold text-slate-400 uppercase">{t.ageTable.inputLabel}</span>
                                     <input
                                         type="number"
-                                        placeholder="Age"
+                                        placeholder={t.ageTable.placeholder}
                                         className="w-16 px-2 py-1 text-sm font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-100 outline-none text-center"
                                         onChange={(e) => setSelectedAge(e.target.value ? parseInt(e.target.value) : null)}
                                     />
@@ -132,9 +132,9 @@ const AwardsRulesSection = () => {
                                 <table className="w-full text-sm">
                                     <thead className="text-slate-400 text-xs uppercase font-bold bg-white">
                                         <tr>
-                                            <th className="px-6 py-3 text-left">Age Range</th>
-                                            <th className="px-6 py-3 text-center text-blue-500">Male</th>
-                                            <th className="px-6 py-3 text-center text-pink-500">Female</th>
+                                            <th className="px-6 py-3 text-left">{t.ageTable.columns.range}</th>
+                                            <th className="px-6 py-3 text-center text-blue-500">{t.ageTable.columns.male}</th>
+                                            <th className="px-6 py-3 text-center text-pink-500">{t.ageTable.columns.female}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
@@ -153,8 +153,8 @@ const AwardsRulesSection = () => {
                             {selectedAge !== null && (
                                 <div className="px-6 py-3 bg-indigo-50 text-indigo-700 text-xs font-bold text-center border-t border-indigo-100">
                                     {selectedAge < 12
-                                        ? "น้องๆ อายุต่ำกว่า 12 ปี ต้องวิ่งพร้อมผู้ปกครองครับ (Kids Run)"
-                                        : "คุณมีสิทธิ์ลุ้นรางวัลในรุ่นที่ไฮไลท์ไว้! 🎯"}
+                                        ? t.ageTable.feedback.kids
+                                        : t.ageTable.feedback.eligible}
                                 </div>
                             )}
                         </div>
@@ -170,21 +170,21 @@ const AwardsRulesSection = () => {
                             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-purple-500 mb-4 mx-auto shadow-sm">
                                 <Sparkles size={20} />
                             </div>
-                            <h4 className="font-black text-slate-800 text-lg mb-1">Fancy Run Special</h4>
-                            <p className="text-slate-500 text-xs mb-6 px-4">รางวัลพิเศษสำหรับชุดแฟนซี (ไม่จำกัดรุ่นอายุ)</p>
+                            <h4 className="font-black text-slate-800 text-lg mb-1">{t.fancy.title}</h4>
+                            <p className="text-slate-500 text-xs mb-6 px-4">{t.fancy.desc}</p>
 
                             <div className="space-y-3 relative z-10">
                                 <div className="bg-white/60 rounded-xl p-3 backdrop-blur-sm border border-white/50">
-                                    <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Winner</span>
+                                    <span className="text-xs font-bold text-slate-400 uppercase block mb-1">{t.fancy.winner}</span>
                                     <span className="text-xl font-black text-purple-600">3,000.-</span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="bg-white/60 rounded-xl p-3 backdrop-blur-sm border border-white/50">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">2nd</span>
+                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">{t.fancy.second}</span>
                                         <span className="text-lg font-black text-pink-500">2,000.-</span>
                                     </div>
                                     <div className="bg-white/60 rounded-xl p-3 backdrop-blur-sm border border-white/50">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">3rd</span>
+                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">{t.fancy.third}</span>
                                         <span className="text-lg font-black text-orange-500">1,000.-</span>
                                     </div>
                                 </div>
@@ -197,7 +197,7 @@ const AwardsRulesSection = () => {
                 {/* --- 4. RULES (CALM & CLEAR) --- */}
                 <div className="max-w-4xl mx-auto border-t border-slate-100 pt-16">
                     <h3 className="text-2xl font-black text-slate-900 mb-8 text-center flex items-center justify-center gap-3">
-                        <Gavel className="w-6 h-6 text-slate-400" /> กติกาสำคัญที่ควรรู้
+                        <Gavel className="w-6 h-6 text-slate-400" /> {t.rules.title}
                     </h3>
 
                     <div className="grid md:grid-cols-2 gap-6">
@@ -207,9 +207,9 @@ const AwardsRulesSection = () => {
                                 <Baby className="w-5 h-5 text-slate-500" />
                             </div>
                             <div>
-                                <h4 className="font-bold text-slate-800 text-sm mb-1">นักวิ่งรุ่นจิ๋ว (ต่ำกว่า 12 ปี)</h4>
+                                <h4 className="font-bold text-slate-800 text-sm mb-1">{t.rules.kids.title}</h4>
                                 <p className="text-xs text-slate-500 leading-relaxed">
-                                    สามารถร่วมกิจกรรมได้ปกติ แต่ต้องอยู่ในการดูแลของผู้ปกครองตลอดเส้นทางเพื่อความปลอดภัย
+                                    {t.rules.kids.desc}
                                 </p>
                             </div>
                         </div>
@@ -220,9 +220,9 @@ const AwardsRulesSection = () => {
                                 <Gavel className="w-5 h-5 text-slate-500" />
                             </div>
                             <div>
-                                <h4 className="font-bold text-slate-800 text-sm mb-1">กฎเหล็กการแข่งขัน</h4>
+                                <h4 className="font-bold text-slate-800 text-sm mb-1">{t.rules.general.title}</h4>
                                 <p className="text-xs text-slate-500 leading-relaxed">
-                                    ต้องติด BIB ด้านหน้าให้เห็นชัดเจน, ห้ามใช้พาหนะทุ่นแรง, และคำตัดสินของกรรมการถือเป็นที่สิ้นสุด
+                                    {t.rules.general.desc}
                                 </p>
                             </div>
                         </div>

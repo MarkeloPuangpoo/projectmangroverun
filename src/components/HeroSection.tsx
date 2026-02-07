@@ -63,7 +63,7 @@ const HeroSection = () => {
                     </Link>
 
                     {/* Secondary Button (Visual Whisper) */}
-                    <Link href="/#race-info" className="hidden sm:block">
+                    <Link href="/check-status" className="hidden sm:block">
                         <button className="flex items-center gap-2 text-white/70 hover:text-white font-bold text-sm uppercase tracking-wide transition-colors border-b border-transparent hover:border-neon-green pb-0.5">
                             <PlayCircle size={18} />
                             {t.moreDetail}

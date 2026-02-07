@@ -21,8 +21,11 @@ import {
     AlertTriangle,
     MapPin,
     Shirt,
-    Loader2
+    Loader2,
+    Download
 } from 'lucide-react';
+import { pdf } from '@react-pdf/renderer';
+import RunnerReportPDF from '@/components/admin/RunnerReportPDF';
 
 // --- Utility: Highlight Text ---
 const HighlightText = ({ text, highlight }: { text: string; highlight: string }) => {
@@ -146,9 +149,25 @@ export default function RunnerListPage() {
         }
     };
 
-    const handleExportCSV = () => {
-        // ... (Logic เดิม) ...
-        alert("Exporting CSV...");
+    const handleExportPDF = async () => {
+        if (registrations.length === 0) {
+            alert("No data to export");
+            return;
+        }
+
+        try {
+            const blob = await pdf(<RunnerReportPDF data={filteredData} />).toBlob();
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `MangroveRun_Runners_${new Date().toISOString().split('T')[0]}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            alert('Failed to generate PDF');
+        }
     };
 
     return (
@@ -165,8 +184,8 @@ export default function RunnerListPage() {
                             <p className="text-slate-500 font-medium">Manage registrations & payments</p>
                         </div>
                         <div className="flex gap-3">
-                            <button onClick={handleExportCSV} className="btn-secondary flex items-center gap-2 px-4 py-2 rounded-xl border bg-white hover:bg-slate-50 font-bold text-slate-600 text-sm">
-                                <FileSpreadsheet size={16} /> Export
+                            <button onClick={handleExportPDF} className="btn-secondary flex items-center gap-2 px-4 py-2 rounded-xl border bg-white hover:bg-slate-50 font-bold text-slate-600 text-sm">
+                                <FileSpreadsheet size={16} /> Export PDF
                             </button>
                             <button className="btn-primary flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 font-bold text-sm shadow-lg shadow-indigo-200">
                                 <UserPlus size={16} /> New Runner

@@ -3,68 +3,35 @@
 import React, { useState } from 'react';
 import { Plus, Minus, HelpCircle, MapPin, Shirt, AlertCircle, Car } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { translations } from '@/data/translations';
 
 const FAQSection = () => {
     const { language } = useLanguage();
+    const t = translations[language].faq;
     const [openIndex, setOpenIndex] = useState<number | null>(0);
 
     const toggleAccordion = (index: number) => {
         setOpenIndex(openIndex === index ? null : index);
     };
 
-    // Data based on PDF info & Standard Event Rules
-    const faqs = [
-        {
-            category: "General",
-            question: language === 'th' ? "งานจัดที่ไหน และปล่อยตัวกี่โมง?" : "Where is the event and what time does it start?",
-            answer: language === 'th'
-                ? "งานจัดที่ โรงเรียนบางปะกง \"บวรวิทยายน\" เวลาปล่อยตัว: 10.5KM (05:45 น.), 6KM (06:05 น.) และ 5KM (06:15 น.)"
-                : "The event is at Bangpakong 'Bowonwittayayon' School. Start times: 10.5KM (05:45), 6KM (06:05), and 5KM (06:15).",
-            icon: MapPin
-        },
-        {
-            category: "Services",
-            question: language === 'th' ? "มีสถานที่จอดรถให้บริการหรือไม่?" : "Is there parking available?",
-            answer: language === 'th'
-                ? "มีจุดจอดรถรองรับหลายจุด ได้แก่: 1. สภ.บางปะกง 2. ปั๊ม Esso 3. กรมพัฒนาที่ดินฉะเชิงเทรา 4. ด่านกักกันสัตว์ฉะเชิงเทรา"
-                : "Parking is available at: 1. Bang Pakong Police Station 2. Esso Station 3. Chachoengsao Land Development Station 4. Animal Quarantine Station.",
-            icon: Car
-        },
-        {
-            category: "Race Kit",
-            question: language === 'th' ? "รับเสื้อและ BIB ได้ที่ไหน?" : "Where to pick up the Race Kit?",
-            answer: language === 'th'
-                ? "สามารถเลือกรับได้ 2 ช่องทาง: 1. รับด้วยตนเอง ณ โรงเรียนบางปะกง 'บวรวิทยายน' (24-25 พ.ค.) 2. จัดส่งทางไปรษณีย์ (ค่าจัดส่ง 50 บาท)"
-                : "Two options: 1. Pick up at Bangpakong 'Bowonwittayayon' School (May 24-25) 2. Postal delivery (50 THB fee).",
-            icon: Shirt
-        },
-        {
-            category: "Rules",
-            question: language === 'th' ? "เด็กเข้าร่วมกิจกรรมได้หรือไม่?" : "Can children participate?",
-            answer: language === 'th'
-                ? "ได้ครับ เด็กอายุต่ำกว่า 12 ปี สามารถสมัครได้ แต่ต้องอยู่ภายใต้การดูแลของผู้ปกครองตลอดเวลาเพื่อความปลอดภัย"
-                : "Yes, children under 12 can register but must be accompanied by a guardian at all times.",
-            icon: AlertCircle
-        },
-        {
-            category: "Policy",
-            question: language === 'th' ? "สมัครแล้วขอคืนเงินได้หรือไม่?" : "Is the registration fee refundable?",
-            answer: language === 'th'
-                ? "ขอสงวนสิทธิ์ไม่คืนเงินค่าสมัครทุกกรณี แต่สามารถโอนสิทธิ์ให้ผู้อื่นได้ (มีค่าธรรมเนียมการโอนสิทธิ์)"
-                : "Registration fees are non-refundable under any circumstances, but transfers are allowed (fees apply).",
-            icon: HelpCircle
-        }
-    ];
+    // Icon mapping matching the order in translations
+    const icons = [MapPin, Car, Shirt, AlertCircle, HelpCircle];
+
+    // Combine translation items with icons
+    const faqs = t.items.map((item: any, index: number) => ({
+        ...item,
+        icon: icons[index]
+    }));
 
     return (
         <section className="py-20 px-4 bg-gray-50 border-t border-gray-100">
             <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-black text-deep-blue mb-4">
-                        คำถามที่พบบ่อย (FAQ)
+                        {t.title}
                     </h2>
                     <p className="text-gray-500">
-                        ข้อสงสัยเกี่ยวกับการแข่งขัน การเดินทาง และบริการต่างๆ
+                        {t.subtitle}
                     </p>
                 </div>
 
@@ -124,14 +91,14 @@ const FAQSection = () => {
 
                 {/* Contact Support */}
                 <div className="mt-12 text-center p-8 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                    <p className="text-gray-600 mb-4 font-medium">ยังไม่พบคำตอบที่คุณต้องการ?</p>
+                    <p className="text-gray-600 mb-4 font-medium">{t.support.text}</p>
                     <a
                         href="https://m.me/mangroverun"
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-deep-blue text-white rounded-xl font-bold hover:bg-navy transition-colors shadow-lg shadow-blue-900/20"
                     >
-                        <HelpCircle className="w-5 h-5" /> ติดต่อทีมงาน (Contact Support)
+                        <HelpCircle className="w-5 h-5" /> {t.support.button}
                     </a>
                 </div>
             </div>

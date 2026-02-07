@@ -12,57 +12,56 @@ const RouteMapSection = () => {
 
     const [activeTab, setActiveTab] = useState<'10.5KM' | '6KM' | '5KM'>('10.5KM');
 
-    // Data extracted from PDF Source [cite: 6, 99, 119]
-    const routes = {
+    // Static metadata for styling and icons (not translated)
+    const routeMetadata = {
         '10.5KM': {
-            distance: '10.5 KM',
-            title: 'Mini Marathon',
             color: 'text-energetic-orange',
             bgColor: 'bg-energetic-orange',
             borderColor: 'border-energetic-orange',
-            description: "เส้นทางเลียบแม่น้ำบางปะกง สัมผัสธรรมชาติและวิถีชีวิตท้องถิ่น",
-            uTurn: "กลับตัวที่ร้านอาหารแพเคียงน้ำ (ครึ่งทาง)", // 
-            landmarks: [
-                { name: "โรงเรียนบางปะกง (Start)", icon: Flag }, // [cite: 111]
-                { name: "สถานีตำรวจ / โรงพยาบาลบางปะกง", icon: MapPin }, // [cite: 110, 112]
-                { name: "ปั๊ม PTT / ไปรษณีย์", icon: Coffee }, // [cite: 115, 116]
-                { name: "ข้ามแม่น้ำบางปะกง", icon: Navigation }, // [cite: 114]
-                { name: "ร้านอาหารแพเคียงน้ำ (U-Turn)", icon: ArrowLeftRight, highlight: true } // [cite: 102, 117]
+            landmarksMeta: [
+                { icon: Flag },
+                { icon: MapPin },
+                { icon: Coffee },
+                { icon: Navigation },
+                { icon: ArrowLeftRight, highlight: true }
             ]
         },
         '6KM': {
-            distance: '6 KM',
-            title: 'Fun Run',
             color: 'text-mangrove-green',
             bgColor: 'bg-mangrove-green',
             borderColor: 'border-mangrove-green',
-            description: "เส้นทางสนุกสนาน วิ่งสบายๆ ผ่านชุมชนและสถานที่สำคัญ",
-            uTurn: "กลับตัวบริเวณทางแยกเข้าซอยเทศบาลท่าข้าม 4", // 
-            landmarks: [
-                { name: "โรงเรียนบางปะกง (Start)", icon: Flag }, // [cite: 130]
-                { name: "โรงพยาบาลบางปะกง", icon: MapPin }, // [cite: 131]
-                { name: "ปั๊ม PTT / ไปรษณีย์", icon: Coffee }, // [cite: 132, 133]
-                { name: "แยกซอยเทศบาลท่าข้าม 4 (U-Turn)", icon: ArrowLeftRight, highlight: true } // [cite: 122, 135]
+            landmarksMeta: [
+                { icon: Flag },
+                { icon: MapPin },
+                { icon: Coffee },
+                { icon: ArrowLeftRight, highlight: true }
             ]
         },
         '5KM': {
-            distance: '5 KM',
-            title: 'Walk-Run',
             color: 'text-pink-500',
             bgColor: 'bg-pink-500',
             borderColor: 'border-pink-500',
-            description: "เดิน-วิ่งเพื่อสุขภาพ ชมวิวแม่น้ำบนสะพานบางปะกง",
-            uTurn: "กลับตัวครึ่งทางบริเวณกลางสะพานข้ามแม่น้ำ", // 
-            landmarks: [
-                { name: "โรงเรียนบางปะกง (Start)", icon: Flag }, // [cite: 20]
-                { name: "โรงพยาบาลบางปะกง", icon: MapPin }, // [cite: 22]
-                { name: "ปั๊ม PTT", icon: Coffee }, // [cite: 23]
-                { name: "กลางสะพานแม่น้ำบางปะกง (U-Turn)", icon: ArrowLeftRight, highlight: true } // [cite: 9, 18]
+            landmarksMeta: [
+                { icon: Flag },
+                { icon: MapPin },
+                { icon: Coffee },
+                { icon: ArrowLeftRight, highlight: true }
             ]
         }
     };
 
-    const currentRoute = routes[activeTab];
+    // Merge translated text with static metadata
+    const activeRouteText = t.details[activeTab]; // @ts-ignore
+    const activeRouteMeta = routeMetadata[activeTab];
+
+    const currentRoute = {
+        ...activeRouteText,
+        ...activeRouteMeta,
+        landmarks: activeRouteText.landmarks.map((l: any, i: number) => ({
+            ...l,
+            ...activeRouteMeta.landmarksMeta[i]
+        }))
+    };
 
     return (
         <section id="routes" className="py-20 md:py-28 px-4 bg-gray-50 relative">
@@ -74,10 +73,10 @@ const RouteMapSection = () => {
                 <div className="text-center mb-16 animate-fade-in-up">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-4 border border-gray-100">
                         <MapPin className="w-4 h-4 text-neon-green" />
-                        <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">Course Map</span>
+                        <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">{t.badge}</span>
                     </div>
                     <h2 className="text-4xl md:text-5xl font-black text-deep-blue uppercase mb-4 tracking-tight">
-                        เส้นทางวิ่ง <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-emerald-600">ชมธรรมชาติ</span>
+                        {t.title} <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-emerald-600">{t.highlight}</span>
                     </h2>
                     <div className="w-24 h-2 bg-gradient-to-r from-neon-green to-deep-blue mx-auto rounded-full" />
                 </div>
@@ -100,7 +99,7 @@ const RouteMapSection = () => {
                                 }}
                             />
 
-                            {(Object.keys(routes) as Array<keyof typeof routes>).map((key) => (
+                            {(Object.keys(routeMetadata) as Array<keyof typeof routeMetadata>).map((key) => (
                                 <button
                                     key={key}
                                     onClick={() => setActiveTab(key)}
@@ -131,7 +130,7 @@ const RouteMapSection = () => {
                                 {/* Vertical Line */}
                                 <div className="absolute left-[19px] top-2 bottom-4 w-0.5 bg-gray-100" />
 
-                                {currentRoute.landmarks.map((landmark, index) => (
+                                {currentRoute.landmarks.map((landmark: any, index: number) => (
                                     <div key={index} className="flex items-center gap-4 relative py-3 group">
                                         {/* Dot */}
                                         <div className={`
@@ -154,7 +153,7 @@ const RouteMapSection = () => {
 
                         {/* U-Turn Alert */}
                         <div className={`mt-8 p-4 rounded-xl bg-gray-50 border-l-4 ${currentRoute.borderColor}`}>
-                            <p className="text-xs font-bold text-gray-400 uppercase mb-1">จุดกลับตัว (U-Turn Point)</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase mb-1">{t.uTurnLabel}</p>
                             <p className="text-sm font-bold text-deep-blue">{currentRoute.uTurn}</p>
                         </div>
                     </div>
@@ -181,16 +180,16 @@ const RouteMapSection = () => {
                                 <div className="bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-2xl text-center transform transition-all duration-300 group-hover:-translate-y-2">
                                     <MapPin className={`w-12 h-12 mx-auto mb-3 ${currentRoute.color}`} />
                                     <h4 className="text-xl font-black text-deep-blue mb-1">
-                                        แผนที่ระยะ {currentRoute.distance}
+                                        {t.mapCard.titlePrefix} {currentRoute.distance}
                                     </h4>
-                                    <p className="text-xs text-gray-500 mb-4">คลิกเพื่อดูภาพขยาย หรือ เปิด Google Maps</p>
+                                    <p className="text-xs text-gray-500 mb-4">{t.mapCard.hint}</p>
 
                                     <div className="flex gap-3 justify-center">
                                         <button className="flex items-center gap-2 px-4 py-2 bg-deep-blue text-white rounded-xl text-sm font-bold hover:bg-navy transition-colors">
-                                            <ZoomIn className="w-4 h-4" /> ดูรูปภาพ
+                                            <ZoomIn className="w-4 h-4" /> {t.mapCard.btnZoom}
                                         </button>
                                         <button className="flex items-center gap-2 px-4 py-2 bg-white text-deep-blue border border-gray-200 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors">
-                                            <ExternalLink className="w-4 h-4" /> Google Maps
+                                            <ExternalLink className="w-4 h-4" /> {t.mapCard.btnGoogle}
                                         </button>
                                     </div>
                                 </div>
