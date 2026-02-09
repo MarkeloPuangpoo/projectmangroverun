@@ -12,7 +12,10 @@ import {
     CheckCircle2,
     Clock,
     Printer,
-    BarChart3
+    BarChart3,
+    Edit2,
+    Save,
+    X
 } from 'lucide-react';
 
 const ALL_SIZES = ['5XS', '4XS', '3XS', '2XS', 'SS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'];
@@ -20,6 +23,9 @@ const ALL_SIZES = ['5XS', '4XS', '3XS', '2XS', 'SS', 'S', 'M', 'L', 'XL', '2XL',
 export default function ShirtStockPage() {
     const [loading, setLoading] = useState(true);
     const [registrations, setRegistrations] = useState<any[]>([]);
+    const [shirtLimits, setShirtLimits] = useState<Record<string, number>>({});
+    const [isEditing, setIsEditing] = useState(false);
+    const [tempLimits, setTempLimits] = useState<Record<string, number>>({});
 
     useEffect(() => {
         fetchData();
@@ -27,12 +33,30 @@ export default function ShirtStockPage() {
 
     const fetchData = async () => {
         try {
-            const { data, error } = await supabase
-                .from('registrations')
-                .select('shirt_size, status');
+            setLoading(true);
+            const [regRes, settingsRes] = await Promise.all([
+                supabase.from('registrations').select('shirt_size, status'),
+                supabase.from('settings').select('value').eq('key', 'shirt_limits').single()
+            ]);
 
-            if (error) throw error;
-            setRegistrations(data || []);
+            if (regRes.error) throw regRes.error;
+            setRegistrations(regRes.data || []);
+
+            if (settingsRes.data?.value) {
+                try {
+                    const parsed = JSON.parse(settingsRes.data.value);
+                    setShirtLimits(parsed);
+                    setTempLimits(parsed);
+                } catch (e) {
+                    console.error("Failed to parse shirt limits", e);
+                }
+            } else {
+                // Initialize default limits if not set (e.g., 100 per size)
+                const defaults = ALL_SIZES.reduce((acc, size) => ({ ...acc, [size]: 0 }), {});
+                setShirtLimits(defaults);
+                setTempLimits(defaults);
+            }
+
         } catch (error) {
             console.error('Error:', error);
         } finally {
@@ -40,12 +64,33 @@ export default function ShirtStockPage() {
         }
     };
 
+    const handleSaveLimits = async () => {
+        try {
+            setLoading(true);
+            const { error } = await supabase
+                .from('settings')
+                .upsert({ key: 'shirt_limits', value: JSON.stringify(tempLimits) });
+
+            if (error) throw error;
+
+            setShirtLimits(tempLimits);
+            setIsEditing(false);
+            alert("Stock limits updated successfully!");
+        } catch (error) {
+            console.error("Error saving limits:", error);
+            alert("Failed to save limits");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const stats = useMemo(() => {
-        const counts: Record<string, { total: number, approved: number, pending: number }> = {};
+        const counts: Record<string, { total: number, approved: number, pending: number, limit: number, remaining: number }> = {};
 
         // Initialize
         ALL_SIZES.forEach(size => {
-            counts[size] = { total: 0, approved: 0, pending: 0 };
+            const limit = shirtLimits[size] || 0;
+            counts[size] = { total: 0, approved: 0, pending: 0, limit, remaining: limit };
         });
 
         // Count
@@ -55,6 +100,9 @@ export default function ShirtStockPage() {
                 counts[size].total++;
                 if (reg.status === 'approved') counts[size].approved++;
                 if (reg.status === 'pending') counts[size].pending++;
+
+                // Remaining logic: Limit - (Approved + Pending) ... or just Approved? Usually Approved+Pending holds stock.
+                counts[size].remaining = Math.max(0, counts[size].limit - counts[size].total);
             }
         });
 
@@ -66,15 +114,17 @@ export default function ShirtStockPage() {
         const topSize = sortedSizes[0]?.[0] || '-';
 
         return { counts, totalNeeded, totalPending, topSize };
-    }, [registrations]);
+    }, [registrations, shirtLimits]);
 
     const handleExport = () => {
-        const headers = ['Size,Approved (Paid),Pending,Total Request'];
+        const headers = ['Size,Limit,Used (Total),Remaining,Approved (Paid),Pending'];
         const rows = ALL_SIZES.map(size => [
             size,
+            stats.counts[size].limit,
+            stats.counts[size].total,
+            stats.counts[size].remaining,
             stats.counts[size].approved,
-            stats.counts[size].pending,
-            stats.counts[size].total
+            stats.counts[size].pending
         ].join(','));
 
         const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join('\n');
@@ -107,22 +157,44 @@ export default function ShirtStockPage() {
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
                             <div>
                                 <h1 className="text-3xl font-black text-slate-800 tracking-tight">Shirt Inventory</h1>
-                                <p className="text-slate-400 font-medium mt-1">Track shirt sizes for production</p>
+                                <p className="text-slate-400 font-medium mt-1">Track shirt sizes and manage stock limits</p>
                             </div>
                             <div className="flex gap-3">
+                                {isEditing ? (
+                                    <>
+                                        <button
+                                            onClick={() => setIsEditing(false)}
+                                            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-red-200 text-red-600 rounded-xl font-bold text-sm hover:bg-red-50 transition-all"
+                                        >
+                                            <X size={18} /> Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleSaveLimits}
+                                            disabled={loading}
+                                            className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all"
+                                        >
+                                            <Save size={18} /> Save Limits
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={() => setIsEditing(true)}
+                                        className="flex items-center gap-2 px-5 py-2.5 bg-white border border-indigo-200 text-indigo-600 rounded-xl font-bold text-sm hover:bg-indigo-50 transition-all"
+                                    >
+                                        <Edit2 size={18} /> Edit Limits
+                                    </button>
+                                )}
                                 <button
                                     onClick={handlePrint}
                                     className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-bold text-sm hover:bg-slate-50 transition-all"
                                 >
-                                    <Printer size={18} />
-                                    Print List
+                                    <Printer size={18} /> Print
                                 </button>
                                 <button
                                     onClick={handleExport}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all transform hover:-translate-y-0.5"
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all"
                                 >
-                                    <Download size={18} />
-                                    Export CSV
+                                    <Download size={18} /> CSV
                                 </button>
                             </div>
                         </div>
@@ -186,6 +258,9 @@ export default function ShirtStockPage() {
                                     {ALL_SIZES.map(size => {
                                         const data = stats.counts[size];
                                         const isPopular = size === stats.topSize;
+                                        const percentageUsed = data.limit > 0 ? (data.total / data.limit) * 100 : 0;
+                                        const isCritical = percentageUsed >= 90;
+                                        const isWarning = percentageUsed >= 75;
 
                                         return (
                                             <div
@@ -193,6 +268,7 @@ export default function ShirtStockPage() {
                                                 className={`
                                                     relative p-5 rounded-2xl border transition-all duration-300 group hover:-translate-y-1 hover:shadow-md
                                                     ${isPopular ? 'bg-indigo-50 border-indigo-200' : 'bg-slate-50 border-slate-100 hover:bg-white'}
+                                                    ${isCritical && !isEditing ? 'ring-2 ring-red-500 ring-offset-2' : ''}
                                                 `}
                                             >
                                                 {isPopular && (
@@ -209,24 +285,42 @@ export default function ShirtStockPage() {
                                                         {size}
                                                     </div>
                                                     <div className="text-right">
-                                                        <div className="text-2xl font-black text-slate-800">{data.total}</div>
-                                                        <div className="text-[10px] text-slate-400 font-bold uppercase">Total</div>
+                                                        {isEditing ? (
+                                                            <div className="flex flex-col items-end">
+                                                                <span className="text-[10px] text-slate-400 font-bold uppercase mb-1">Set Limit</span>
+                                                                <input
+                                                                    type="number"
+                                                                    className="w-16 p-1 text-right font-black text-slate-800 border rounded bg-white focus:ring-2 focus:ring-indigo-500"
+                                                                    value={tempLimits[size] || 0}
+                                                                    onChange={(e) => setTempLimits({ ...tempLimits, [size]: parseInt(e.target.value) || 0 })}
+                                                                />
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                <div className={`text-2xl font-black ${isCritical ? 'text-red-500' : 'text-slate-800'}`}>
+                                                                    {data.total} <span className="text-xs text-slate-400 font-bold">/ {data.limit}</span>
+                                                                </div>
+                                                                <div className="text-[10px] text-slate-400 font-bold uppercase">Used / Limit</div>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </div>
 
                                                 <div className="space-y-1.5">
+                                                    {/* Progress Bar (Limit Utilization) */}
+                                                    <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden mb-2">
+                                                        <div
+                                                            className={`h-full rounded-full transition-all duration-500 ${isCritical ? 'bg-red-500' : isWarning ? 'bg-orange-500' : 'bg-indigo-500'}`}
+                                                            style={{ width: `${Math.min(percentageUsed, 100)}%` }}
+                                                        ></div>
+                                                    </div>
+
                                                     {/* Approved Bar */}
                                                     <div className="flex justify-between items-center text-xs">
                                                         <span className="text-emerald-600 font-bold flex items-center gap-1">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Paid
                                                         </span>
                                                         <span className="font-bold text-slate-700">{data.approved}</span>
-                                                    </div>
-                                                    <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
-                                                        <div
-                                                            className="h-full bg-emerald-500 rounded-full"
-                                                            style={{ width: `${data.total > 0 ? (data.approved / data.total) * 100 : 0}%` }}
-                                                        ></div>
                                                     </div>
 
                                                     {/* Pending Bar */}
@@ -272,7 +366,7 @@ export default function ShirtStockPage() {
                                     <th className="p-4 border border-slate-300">Size</th>
                                     <th className="p-4 border border-slate-300 bg-emerald-50 text-emerald-900 w-1/4">Confirmed (Paid)</th>
                                     <th className="p-4 border border-slate-300 text-slate-500 w-1/4">Pending</th>
-                                    <th className="p-4 border border-slate-300 text-slate-900 w-1/4">Grand Total</th>
+                                    <th className="p-4 border border-slate-300 text-slate-900 w-1/4">Order Total</th>
                                 </tr>
                             </thead>
                             <tbody>

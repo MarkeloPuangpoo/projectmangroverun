@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import AdminAuthGuard from '@/components/admin/AdminAuthGuard';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import EditRunnerModal from '@/components/admin/EditRunnerModal';
 import { Registration } from '@/types/registration';
 import {
     Search,
@@ -22,7 +23,8 @@ import {
     MapPin,
     Shirt,
     Loader2,
-    Download
+    Download,
+    Edit // Added Edit icon
 } from 'lucide-react';
 import { pdf } from '@react-pdf/renderer';
 import RunnerReportPDF from '@/components/admin/RunnerReportPDF';
@@ -69,6 +71,7 @@ export default function RunnerListPage() {
 
     // Modal State
     const [selectedRunner, setSelectedRunner] = useState<Registration | null>(null);
+    const [editingRunner, setEditingRunner] = useState<Registration | null>(null); // New State
     const [isProcessing, setIsProcessing] = useState(false);
 
     // --- 1. Fetch Data ---
@@ -149,6 +152,65 @@ export default function RunnerListPage() {
         }
     };
 
+    const handleUpdateRunner = (updatedRunner: Registration) => {
+        setRegistrations(prev => prev.map(r => r.id === updatedRunner.id ? updatedRunner : r));
+        setEditingRunner(null);
+        // Also update selectedRunner if it's the one being edited
+        if (selectedRunner?.id === updatedRunner.id) {
+            setSelectedRunner(updatedRunner);
+        }
+    };
+
+    const handleExportCSV = () => {
+        if (filteredData.length === 0) {
+            alert("No data to export");
+            return;
+        }
+
+        const headers = [
+            "ID", "Created At", "Status",
+            "Bib Number", "Race Category", "Shirt Size",
+            "Full Name (TH)", "Full Name (EN)", "Gender", "Birth Date", "Age", "National ID",
+            "Phone", "Email", "Shipping Method", "Address", "Medical Conditions", "Payment Slip URL"
+        ];
+
+        const escapeCsv = (str: string | null | undefined) => {
+            if (!str) return "";
+            return `"${String(str).replace(/"/g, '""')}"`; // Escape double quotes
+        };
+
+        const rows = filteredData.map(reg => [
+            escapeCsv(reg.id),
+            escapeCsv(reg.created_at),
+            escapeCsv(reg.status),
+            escapeCsv(reg.bib_number || 'N/A'),
+            escapeCsv(reg.race_category),
+            escapeCsv(reg.shirt_size),
+            escapeCsv(reg.full_name_th),
+            escapeCsv(reg.full_name_en),
+            escapeCsv(reg.gender),
+            escapeCsv(reg.birth_date),
+            escapeCsv(reg.age?.toString()), // Fix: Convert number to string
+            escapeCsv(reg.national_id),
+            escapeCsv(reg.phone),
+            escapeCsv(reg.email),
+            escapeCsv(reg.shipping_method),
+            escapeCsv(reg.address),
+            escapeCsv(reg.medical_conditions),
+            escapeCsv(reg.payment_slip_url)
+        ].join(","));
+
+        const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\n"); // Add BOM for Excel Thai support
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `MangroveRun_Export_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const handleExportPDF = async () => {
         if (registrations.length === 0) {
             alert("No data to export");
@@ -184,6 +246,9 @@ export default function RunnerListPage() {
                             <p className="text-slate-500 font-medium">Manage registrations & payments</p>
                         </div>
                         <div className="flex gap-3">
+                            <button onClick={handleExportCSV} className="btn-secondary flex items-center gap-2 px-4 py-2 rounded-xl border bg-white hover:bg-slate-50 font-bold text-slate-600 text-sm">
+                                <Download size={16} /> Export CSV
+                            </button>
                             <button onClick={handleExportPDF} className="btn-secondary flex items-center gap-2 px-4 py-2 rounded-xl border bg-white hover:bg-slate-50 font-bold text-slate-600 text-sm">
                                 <FileSpreadsheet size={16} /> Export PDF
                             </button>
@@ -420,16 +485,28 @@ export default function RunnerListPage() {
                                         <h2 className="text-2xl font-black text-slate-800">{selectedRunner.full_name_th}</h2>
                                         <p className="text-slate-500 font-medium">{selectedRunner.race_category} • {selectedRunner.gender.toUpperCase()}</p>
                                     </div>
-                                    <button onClick={() => setSelectedRunner(null)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
-                                        <X size={24} />
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => setEditingRunner(selectedRunner)}
+                                            className="p-2 hover:bg-slate-100 rounded-full text-indigo-500"
+                                            title="Edit Runner"
+                                        >
+                                            <Edit size={24} />
+                                        </button>
+                                        <button onClick={() => setSelectedRunner(null)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
+                                            <X size={24} />
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-4 mb-8 flex-1 overflow-y-auto">
                                     <InfoItem label="National ID" value={selectedRunner.national_id} />
                                     <InfoItem label="Phone" value={selectedRunner.phone} />
                                     <InfoItem label="Email" value={selectedRunner.email} />
+                                    <InfoItem label="Shirt Size" value={selectedRunner.shirt_size} />
+                                    <InfoItem label="BIB Number" value={selectedRunner.bib_number || '-'} />
                                     <InfoItem label="Shipping" value={selectedRunner.shipping_method} />
+                                    <InfoItem label="Address" value={selectedRunner.address || '-'} />
                                     <InfoItem label="Registered At" value={new Date(selectedRunner.created_at).toLocaleString('th-TH')} />
                                 </div>
 
@@ -461,6 +538,15 @@ export default function RunnerListPage() {
                         </div>
                     </div>
                 )}
+
+                {/* --- Edit Modal --- */}
+                {editingRunner && (
+                    <EditRunnerModal
+                        runner={editingRunner}
+                        onClose={() => setEditingRunner(null)}
+                        onUpdate={handleUpdateRunner}
+                    />
+                )}
             </div>
         </AdminAuthGuard>
     );
@@ -470,6 +556,6 @@ export default function RunnerListPage() {
 const InfoItem = ({ label, value }: { label: string, value: string }) => (
     <div className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0">
         <span className="text-slate-400 text-sm font-bold uppercase">{label}</span>
-        <span className="text-slate-800 font-medium text-right">{value}</span>
+        <span className="text-slate-800 font-medium text-right max-w-[200px] truncate" title={value}>{value}</span>
     </div>
 );

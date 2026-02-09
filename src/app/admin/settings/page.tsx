@@ -5,23 +5,22 @@ import { supabase } from '@/lib/supabaseClient';
 import AdminAuthGuard from '@/components/admin/AdminAuthGuard';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import {
-    Save,
-    Trophy,
     Settings,
-    AlertCircle,
-    CheckCircle2,
+    Save,
+    Power,
     Target,
-    Calendar,
-    Power
+    Loader2,
+    CheckCircle2,
+    AlertTriangle
 } from 'lucide-react';
 
 export default function SettingsPage() {
-    const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
-    const [runnerGoal, setRunnerGoal] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
-    // Fake state for UI demonstration (ถ้ามีตาราง settings จริงก็ผูกค่าได้)
-    const [isRegOpen, setIsRegOpen] = useState(true);
+    // Settings State
+    const [runnerGoal, setRunnerGoal] = useState<string>('2000');
+    const [isRegOpen, setIsRegOpen] = useState<boolean>(true);
 
     useEffect(() => {
         fetchSettings();
@@ -29,197 +28,177 @@ export default function SettingsPage() {
 
     const fetchSettings = async () => {
         try {
+            setLoading(true);
             const { data, error } = await supabase
                 .from('settings')
-                .select('value')
-                .eq('key', 'runner_goal')
-                .single();
+                .select('*');
+
+            if (error) throw error;
 
             if (data) {
-                setRunnerGoal(data.value);
+                const goalSetting = data.find(s => s.key === 'runner_goal');
+                if (goalSetting) setRunnerGoal(goalSetting.value);
+
+                const statusSetting = data.find(s => s.key === 'registration_status');
+                if (statusSetting) setIsRegOpen(statusSetting.value === 'open');
             }
         } catch (error) {
             console.error('Error fetching settings:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleSave = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setSuccess(false);
-
+    const handleSaveGoal = async () => {
+        setSaving(true);
         try {
             const { error } = await supabase
                 .from('settings')
                 .upsert({ key: 'runner_goal', value: runnerGoal });
 
             if (error) throw error;
-            setSuccess(true);
-            setTimeout(() => setSuccess(false), 3000);
+            alert('Runner Goal Updated!');
         } catch (error) {
-            alert('Failed to save settings');
+            console.error('Error saving goal:', error);
+            alert('Failed to update goal');
         } finally {
-            setLoading(false);
+            setSaving(false);
+        }
+    };
+
+    const handleToggleRegistration = async () => {
+        const newState = !isRegOpen;
+        setIsRegOpen(newState); // Optimistic update
+
+        try {
+            const { error } = await supabase
+                .from('settings')
+                .upsert({ key: 'registration_status', value: newState ? 'open' : 'closed' });
+
+            if (error) {
+                setIsRegOpen(!newState); // Revert on error
+                throw error;
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+            alert('Failed to update registration status');
         }
     };
 
     return (
         <AdminAuthGuard>
             <div className="flex min-h-screen bg-[#F8FAFC] font-sans text-slate-800">
-                {/* Sidebar */}
                 <AdminSidebar />
 
-                {/* Main Content */}
-                <main className="flex-1 lg:ml-72 p-6 lg:p-10 transition-all duration-300">
+                <main className="flex-1 lg:ml-72 p-6 lg:p-10">
+                    <div className="max-w-3xl mx-auto">
 
-                    {/* Header */}
-                    <div className="flex items-center gap-4 mb-10">
-                        <div className="p-3 bg-white rounded-2xl shadow-sm border border-slate-100">
-                            <Settings className="w-6 h-6 text-indigo-600" />
+                        {/* Header */}
+                        <div className="flex items-center gap-4 mb-10">
+                            <div className="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                                <Settings size={24} />
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-black text-slate-900 tracking-tight">System Settings</h1>
+                                <p className="text-slate-500 font-medium">Configure global application parameters</p>
+                            </div>
                         </div>
-                        <div>
-                            <h1 className="text-3xl font-black text-slate-800 tracking-tight">System Settings</h1>
-                            <p className="text-slate-400 font-medium text-sm">Configure event parameters and global options</p>
-                        </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl">
+                        {loading ? (
+                            <div className="flex justify-center py-20">
+                                <Loader2 className="animate-spin text-indigo-500" size={32} />
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
 
-                        {/* Main Settings Card */}
-                        <div className="lg:col-span-2">
-                            <form onSubmit={handleSave} className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
+                                {/* --- Registration Status Card --- */}
+                                <div className="bg-white rounded-[1.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
+                                    <div className={`absolute top-0 right-0 p-32 opacity-5 rounded-full blur-3xl ${isRegOpen ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
 
-                                <div className="p-8 border-b border-slate-50">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                                            <Target size={20} />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-slate-800">Event Goals</h3>
-                                            <p className="text-xs text-slate-400">Set targets for registration dashboard</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-6">
-                                        <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                                Total Runner Capacity
-                                            </label>
-                                            <div className="relative group">
-                                                <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
-                                                <input
-                                                    type="number"
-                                                    required
-                                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-all text-slate-800 font-bold placeholder:text-slate-300"
-                                                    placeholder="e.g. 1500"
-                                                    value={runnerGoal}
-                                                    onChange={(e) => setRunnerGoal(e.target.value)}
-                                                />
-                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 bg-white px-2 py-1 rounded-md shadow-sm">
-                                                    Runners
-                                                </div>
-                                            </div>
-                                            <div className="mt-3 flex gap-2 items-start p-3 bg-blue-50 rounded-xl text-blue-700 text-xs leading-relaxed border border-blue-100">
-                                                <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                                                <p>This number is used to calculate the percentage progress circle on the main dashboard. It does not automatically close registration.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Example of another section (Disabled UI for now just for looks) */}
-                                <div className="p-8 bg-slate-50/50">
-                                    <div className="flex items-center justify-between opacity-60 pointer-events-none grayscale">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                                                <Calendar size={20} />
+                                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                        <div className="flex items-start gap-4">
+                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-sm ${isRegOpen ? 'bg-emerald-500' : 'bg-rose-500'}`}>
+                                                <Power size={24} />
                                             </div>
                                             <div>
-                                                <h3 className="text-lg font-bold text-slate-800">Event Date</h3>
-                                                <p className="text-xs text-slate-400">May 25, 2026</p>
+                                                <h3 className="text-xl font-bold text-slate-800">Registration Status</h3>
+                                                <p className="text-slate-500 text-sm mt-1 max-w-sm">
+                                                    Control whether new runners can access the registration form.
+                                                    Currently <span className={`font-black ${isRegOpen ? 'text-emerald-600' : 'text-rose-600'}`}>{isRegOpen ? 'OPEN' : 'CLOSED'}</span>.
+                                                </p>
                                             </div>
                                         </div>
-                                        <button type="button" className="text-sm font-bold text-indigo-600">Edit</button>
-                                    </div>
-                                </div>
 
-                                {/* Footer Actions */}
-                                <div className="p-6 bg-white border-t border-slate-100 flex items-center justify-between">
-                                    <div className="h-8">
-                                        {success && (
-                                            <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg animate-in fade-in slide-in-from-left-2">
-                                                <CheckCircle2 size={16} />
-                                                <span className="text-xs font-bold">Settings saved successfully</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
-                                    >
-                                        {loading ? (
-                                            <>
-                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                <span>Saving...</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Save size={18} />
-                                                <span>Save Changes</span>
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-
-                        {/* Right Column: Status Card */}
-                        <div className="lg:col-span-1 space-y-6">
-
-                            {/* System Status */}
-                            <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100">
-                                <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2">
-                                    <Power size={20} className="text-slate-400" />
-                                    System Status
-                                </h3>
-
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                        <div>
-                                            <p className="text-sm font-bold text-slate-700">Registration</p>
-                                            <p className="text-xs text-slate-400">Allow new runners</p>
-                                        </div>
                                         <button
-                                            onClick={() => setIsRegOpen(!isRegOpen)}
-                                            className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${isRegOpen ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                                            onClick={handleToggleRegistration}
+                                            className={`
+                                                relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-100
+                                                ${isRegOpen ? 'bg-emerald-500' : 'bg-slate-200'}
+                                            `}
                                         >
-                                            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-300 ${isRegOpen ? 'left-7' : 'left-1'}`}></div>
+                                            <span className="sr-only">Toggle Registration</span>
+                                            <span
+                                                className={`
+                                                    inline-block h-8 w-8 transform rounded-full bg-white shadow-md transition duration-300 ease-in-out
+                                                    ${isRegOpen ? 'translate-x-11' : 'translate-x-1'}
+                                                `}
+                                            />
                                         </button>
                                     </div>
+                                </div>
 
-                                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 opacity-60">
-                                        <div>
-                                            <p className="text-sm font-bold text-slate-700">Maintenance Mode</p>
-                                            <p className="text-xs text-slate-400">Close site for updates</p>
+                                {/* --- Runner Goal Card --- */}
+                                <div className="bg-white rounded-[1.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
+                                    <div className="flex items-start gap-4 mb-6">
+                                        <div className="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-600">
+                                            <Target size={24} />
                                         </div>
-                                        <div className="w-12 h-6 rounded-full bg-slate-300 relative cursor-not-allowed">
-                                            <div className="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm"></div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-slate-800">Runner Goal Target</h3>
+                                            <p className="text-slate-500 text-sm mt-1">
+                                                Set the target number of runners for the dashboard progress visualization.
+                                            </p>
                                         </div>
                                     </div>
+
+                                    <div className="flex gap-4">
+                                        <div className="relative flex-1">
+                                            <input
+                                                type="number"
+                                                value={runnerGoal}
+                                                onChange={(e) => setRunnerGoal(e.target.value)}
+                                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                                placeholder="e.g. 2000"
+                                            />
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Runners</span>
+                                        </div>
+                                        <button
+                                            onClick={handleSaveGoal}
+                                            disabled={saving}
+                                            className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-2"
+                                        >
+                                            {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
+                                            Update Goal
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Info Card */}
-                            <div className="bg-gradient-to-br from-indigo-600 to-purple-700 p-6 rounded-[2rem] shadow-lg text-white relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                                <h3 className="font-bold text-lg mb-2 relative z-10">Admin Tips</h3>
-                                <p className="text-indigo-100 text-sm leading-relaxed relative z-10">
-                                    Setting the runner goal helps visualize progress. You can check the "Dashboard" page to see the circular progress bar based on this value.
-                                </p>
-                            </div>
+                                {/* --- Danger Zone (Future) --- */}
+                                <div className="border border-red-100 bg-red-50/50 rounded-[1.5rem] p-8 opacity-60 pointer-events-none">
+                                    <div className="flex items-center gap-3 mb-4 text-red-800">
+                                        <AlertTriangle size={24} />
+                                        <h3 className="text-lg font-bold">Danger Zone</h3>
+                                    </div>
+                                    <p className="text-red-600/70 text-sm mb-4">
+                                        Reset system data or clear all registrations (Coming Soon).
+                                    </p>
+                                    <button className="px-4 py-2 border border-red-200 text-red-600 rounded-lg font-bold text-sm bg-white">
+                                        Clear Database
+                                    </button>
+                                </div>
 
-                        </div>
+                            </div>
+                        )}
                     </div>
                 </main>
             </div>

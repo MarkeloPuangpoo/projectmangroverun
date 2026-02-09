@@ -48,6 +48,8 @@ function RegisterContent() {
         paymentProof: null,
     });
 
+
+
     // Reset error when data changes
     useEffect(() => {
         if (errorMsg) setErrorMsg(null);
