@@ -46,6 +46,7 @@ function RegisterContent() {
         shirtSize: '',
         shipping: 'pickup',
         paymentProof: null,
+        agreedToTerms: false,
     });
 
 
@@ -93,6 +94,11 @@ function RegisterContent() {
     const handleSubmit = async () => {
         if (!formData.paymentProof) {
             setErrorMsg('กรุณาอัพโหลดหลักฐานการโอนเงิน / Please upload payment slip');
+            return;
+        }
+
+        if (!formData.agreedToTerms) {
+            setErrorMsg('กรุณาอ่านและยอมรับข้อตกลงและเงื่อนไขก่อนยืนยัน / Please accept the Terms & Conditions');
             return;
         }
 

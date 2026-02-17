@@ -19,6 +19,7 @@ export interface RegistrationFormData {
     // Step 3: Payment
     paymentProof: File | null;
     kit_picked_up?: boolean;
+    agreedToTerms: boolean;
     checked_in_at?: string;
     bib_number?: string;
     address?: string | null;

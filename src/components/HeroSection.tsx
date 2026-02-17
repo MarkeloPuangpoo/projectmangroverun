@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { MapPin, Calendar, ArrowRight, PlayCircle, Trophy } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowRight, PlayCircle } from 'lucide-react'; // ลบไอคอนที่ไม่ได้ใช้ออกแล้ว
 import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/data/translations';
 import Link from 'next/link';
@@ -9,6 +9,40 @@ import Link from 'next/link';
 const HeroSection = () => {
     const { language } = useLanguage();
     const t = translations[language].hero;
+
+    // สถานะสำหรับ Countdown
+    const [isMounted, setIsMounted] = useState(false);
+    const [timeLeft, setTimeLeft] = useState({
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+    });
+
+    useEffect(() => {
+        setIsMounted(true);
+        // ตั้งเป้าหมายเป็นวันที่ 25 กรกฎาคม 2026 (25/07/2026) เวลา 00:00:00
+        const targetDate = new Date('2026-07-25T00:00:00').getTime();
+
+        const interval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            if (distance < 0) {
+                clearInterval(interval);
+                return;
+            }
+
+            setTimeLeft({
+                days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+                hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+                seconds: Math.floor((distance % (1000 * 60)) / 1000),
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <section id="home" className="relative w-full h-[100svh] min-h-[600px] max-h-[1080px] overflow-hidden bg-deep-blue">
@@ -18,7 +52,7 @@ const HeroSection = () => {
                 <img
                     src="https://images.unsplash.com/photo-1541625602330-2277a4c46182?q=80&w=2940&auto=format&fit=crop"
                     alt="Mangrove Forest"
-                    className="w-full h-full object-cover opacity-50 animate-ken-burns" // Ken Burns Effect แทน Hover Zoom
+                    className="w-full h-full object-cover opacity-50 animate-ken-burns"
                 />
                 {/* Clean Gradient for Text Contrast */}
                 <div className="absolute inset-0 bg-gradient-to-b from-deep-blue/60 via-deep-blue/40 to-deep-blue" />
@@ -35,7 +69,7 @@ const HeroSection = () => {
                 </div>
 
                 {/* Headline: Clean & Impactful */}
-                <div className="text-center mb-4 sm:mb-6 animate-fade-in-up delay-100">
+                <div className="text-center mb-6 sm:mb-10 animate-fade-in-up delay-100">
                     <h1 className="text-5xl sm:text-7xl md:text-8xl font-black text-white tracking-tighter leading-[0.9]">
                         MANGROVE
                     </h1>
@@ -44,13 +78,44 @@ const HeroSection = () => {
                     </h1>
                 </div>
 
-                {/* Value Proposition (The "Why") */}
-                <p className="max-w-xs sm:max-w-xl text-center text-slate-200 text-base sm:text-xl font-medium leading-relaxed mb-8 sm:mb-10 animate-fade-in-up delay-200 px-4">
-                    {/* เปลี่ยนจากคำโปรยลอยๆ เป็นคำที่เห็นภาพ */}
-                    {language === 'th'
-                        ? "วิ่งสัมผัสธรรมชาติ สูดอากาศบริสุทธิ์กลางป่าชายเลน"
-                        : "Experience the purest run through the lungs of Bang Pakong."}
-                </p>
+                {/* Countdown Timer (แทนที่ข้อความเดิม) */}
+                <div className="h-[80px] mb-8 sm:mb-12 animate-fade-in-up delay-200">
+                    {isMounted && (
+                        <div className="flex items-center justify-center gap-4 sm:gap-6 bg-deep-blue/40 px-6 py-4 rounded-2xl border border-white/10 backdrop-blur-md">
+                            {/* Days */}
+                            <div className="flex flex-col items-center min-w-[60px]">
+                                <span className="text-3xl sm:text-4xl font-black text-white leading-none mb-1">
+                                    {timeLeft.days}
+                                </span>
+                                <span className="text-[10px] sm:text-xs text-neon-green uppercase tracking-widest font-bold">Days</span>
+                            </div>
+                            <span className="text-2xl sm:text-3xl text-white/30 font-black pb-4">:</span>
+                            {/* Hours */}
+                            <div className="flex flex-col items-center min-w-[60px]">
+                                <span className="text-3xl sm:text-4xl font-black text-white leading-none mb-1">
+                                    {String(timeLeft.hours).padStart(2, '0')}
+                                </span>
+                                <span className="text-[10px] sm:text-xs text-neon-green uppercase tracking-widest font-bold">Hrs</span>
+                            </div>
+                            <span className="text-2xl sm:text-3xl text-white/30 font-black pb-4">:</span>
+                            {/* Minutes */}
+                            <div className="flex flex-col items-center min-w-[60px]">
+                                <span className="text-3xl sm:text-4xl font-black text-white leading-none mb-1">
+                                    {String(timeLeft.minutes).padStart(2, '0')}
+                                </span>
+                                <span className="text-[10px] sm:text-xs text-neon-green uppercase tracking-widest font-bold">Mins</span>
+                            </div>
+                            <span className="text-2xl sm:text-3xl text-white/30 font-black pb-4">:</span>
+                            {/* Seconds */}
+                            <div className="flex flex-col items-center min-w-[60px]">
+                                <span className="text-3xl sm:text-4xl font-black text-white leading-none mb-1">
+                                    {String(timeLeft.seconds).padStart(2, '0')}
+                                </span>
+                                <span className="text-[10px] sm:text-xs text-neon-green uppercase tracking-widest font-bold">Secs</span>
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 {/* CTA Group: Clear Winner */}
                 <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 animate-fade-in-up delay-300 w-full sm:w-auto px-6 sm:px-0">
@@ -71,65 +136,9 @@ const HeroSection = () => {
                     </Link>
                 </div>
             </div>
-
-            {/* --- 3. Key Info Bar (Replaces Countdown) --- */}
-            {/* ย้ายข้อมูลสำคัญมาไว้ข้างล่างสุด เพื่อให้ User เช็คความพร้อมได้ทันที */}
-            <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-deep-blue/80 backdrop-blur-md">
-                <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 sm:py-6">
-                    {/* ใช้ Grid 2x2 บนมือถือ และ 4x1 บนจอใหญ่ เพื่อความสมดุล */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-12 text-left">
-
-                        {/* Info Item 1: Date */}
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/5 rounded-lg text-neon-green shrink-0">
-                                <Calendar size={18} className="sm:w-5 sm:h-5" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">Race Date</p>
-                                <p className="text-sm sm:text-base text-white font-bold">25 May 2026</p>
-                            </div>
-                        </div>
-
-                        {/* Info Item 2: Location */}
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/5 rounded-lg text-neon-green shrink-0">
-                                <MapPin size={18} className="sm:w-5 sm:h-5" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">Location</p>
-                                <p className="text-sm sm:text-base text-white font-bold truncate max-w-[100px] sm:max-w-none">
-                                    Bang Pakong
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Info Item 3: Distances */}
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/5 rounded-lg text-neon-green shrink-0">
-                                <ArrowRight size={18} className="sm:w-5 sm:h-5 -rotate-45" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">Distances</p>
-                                <p className="text-sm sm:text-base text-white font-bold">5K / 10.5K</p>
-                            </div>
-                        </div>
-
-                        {/* Info Item 4: Prize (Now Visible on Mobile for Balance) */}
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white/5 rounded-lg text-neon-green shrink-0">
-                                <Trophy size={18} className="sm:w-5 sm:h-5" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] sm:text-xs text-slate-400 font-bold uppercase">Total Prize</p>
-                                <p className="text-sm sm:text-base text-white font-bold">฿ 100K+</p>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
+            {/* นำแถบ Key Info Bar ด้านล่างออกตามที่รีเควสแล้ว */}
         </section>
     );
 };
 
-export default HeroSection;
+export default HeroSection; 
